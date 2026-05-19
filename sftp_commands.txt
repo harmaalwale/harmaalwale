@@ -1,0 +1,7 @@
+lcd C:\Users\kauti\harmaalwale_v3
+open sftp://harmakko:your_cpanel_password@harmaalwale.com:22
+cd /home/harmakko/public_html
+put login.html login.html
+put config.php api/config.php
+put api/auth.php api/auth.php
+quit
