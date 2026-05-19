@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM HARMAALWALE - ULTIMATE ONE-CLICK DEPLOY
+REM HARMAALWALE - ONE-CLICK DEPLOY (FIXED)
 REM Local → GitHub + Local → cPanel (simultaneously)
 REM ============================================================
 setlocal enabledelayedexpansion
@@ -37,37 +37,34 @@ git add -A
 git commit -m "Deploy %mydate% %mytime%" 2>nul
 git push origin main
 
-if !errorlevel! equ 0 (
-    echo [✓] Pushed to GitHub
+if %errorlevel% equ 0 (
+    echo [OK] Pushed to GitHub
 ) else (
-    echo [✗] GitHub push failed
+    echo [ERROR] GitHub push failed
 )
 
 echo.
-echo [STEP 3] Syncing to cPanel (pulling latest)
+echo [STEP 3] Syncing to cPanel
 echo.
 
-REM SSH to cPanel and git pull
-ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% ^
-  "cd %REMOTE_FOLDER% && ^
-   git pull origin main && ^
-   find . -type d -exec chmod 755 {} \; 2>/dev/null && ^
-   find . -type f -exec chmod 644 {} \; 2>/dev/null && ^
-   echo 'cPanel synced successfully'"
+REM Deploy to cPanel via git pull
+ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "cd /home/harmakko/public_html; git pull origin main; chmod -R 755 .; find . -type f -exec chmod 644 {} \; 2>/dev/null"
 
-if !errorlevel! equ 0 (
-    echo [✓] cPanel synced
+if %errorlevel% equ 0 (
+    echo [OK] cPanel synced
 ) else (
-    echo [✗] cPanel sync had issues
+    echo [ERROR] cPanel sync failed
 )
 
 echo.
 echo ============================================================
-echo [✓] DEPLOYMENT COMPLETE
+echo DEPLOYMENT COMPLETE
 echo ============================================================
 echo.
 echo GitHub:  https://github.com/harmaalwale/harmaalwale
 echo Live:    https://harmaalwale.com
+echo.
+echo Changes live in 5 seconds
 echo.
 
 :ASK
