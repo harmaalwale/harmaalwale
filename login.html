@@ -4,41 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login / Register – HarmaalWale</title>
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
-  <link rel="canonical" href="https://harmaalwale.com/login.html">
-  <meta name="description" content="Login or register on HarmaalWale to track orders, manage your wishlist and shop seamlessly.">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/hw.css">
   <style>
-    .login-wrap { min-height: calc(100vh - 66px); display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
+    .login-wrap { min-height: calc(100vh - 66px); display: flex; align-items: center; justify-content: center; padding: 32px 16px; background: var(--bg); }
     .login-box { background: var(--bg-2); border: 1.5px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--card-shadow); }
     .login-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
     .login-title span { color: var(--accent); }
     .login-sub { font-size: 13px; color: var(--text-3); margin-bottom: 28px; }
     .otp-row { display: flex; gap: 10px; }
     .otp-row .form-input { flex: 1; }
-    .send-otp-btn { white-space: nowrap; padding: 11px 16px; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text); transition: all 0.2s; font-family: Barlow, sans-serif; }
+    .send-otp-btn { white-space: nowrap; padding: 11px 16px; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text); }
     .send-otp-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .send-otp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     #timer { font-size: 12px; color: var(--accent); font-weight: 700; text-align: center; margin-top: 6px; }
-    .step { display: none; }
+    .step { display: none; } 
     .step.active { display: block; }
-    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
     .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .divider span { font-size: 12px; color: var(--text-3); }
-    .wa-login { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; text-decoration: none; transition: all 0.2s; }
-    .wa-login:hover { border-color: #25D366; color: #25D366; }
-    
-    /* Modal Styles */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; align-items: center; justify-content: center; }
-    .modal-overlay.active { display: flex; }
-    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text); padding: 0; width: 24px; height: 24px; }
-    
-    @media (max-width: 480px) {
-      .login-box { padding: 24px; max-width: 100%; }
-      .login-title { font-size: 22px; }
-    }
+    .divider span { font-size: 12px; color: var(--text-3); font-weight: 600; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; }
+    .modal.show { display: flex; }
   </style>
 </head>
 <body>
@@ -56,91 +41,96 @@
 
 <div class="login-wrap">
   <div class="login-box">
-    <h1 class="login-title">Login / <span>Register</span></h1>
-    <p class="login-sub">Enter your mobile number to receive a one-time password</p>
+    <h1 class="login-title">Login or <span>Sign Up</span></h1>
+    <p class="login-sub">Enter your mobile, email, or admin username</p>
 
     <div id="alertBox"></div>
 
-    <!-- Step 1: Mobile -->
     <div class="step active" id="step1">
       <div class="form-group">
-        <label class="form-label">Mobile Number <span>*</span></label>
-        <div class="otp-row">
-          <div style="display: flex; align-items: center; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px; padding: 0 12px; font-size: 14px; color: var(--text-3);">+91</div>
-          <input type="tel" id="mobileInput" class="form-input" placeholder="10-digit mobile" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-          <button class="send-otp-btn" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
-        </div>
-        <div class="form-hint">We'll send a 6-digit OTP via SMS</div>
+        <label class="form-label">Email, Mobile, or Username <span>*</span></label>
+        <input type="text" id="mobileInput" class="form-input" placeholder="9876543210 / you@email.com / Admin">
+        <div class="form-hint">Customers & vendors: use mobile or email · Admin: enter username</div>
       </div>
-      <div id="timer"></div>
+      <button class="btn btn-primary btn-block" onclick="sendOTP()">Continue →</button>
     </div>
 
-    <!-- Step 2: OTP -->
     <div class="step" id="step2">
       <div class="form-group">
-        <label class="form-label">OTP sent to +91 <span id="maskedMobile"></span></label>
-        <input type="text" id="otpInput" class="form-input" placeholder="Enter 6-digit OTP" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-        <div class="form-hint"><a href="#" onclick="goBack(); return false;" style="color: var(--accent);">Change number</a> · <a href="#" onclick="sendOTP(true); return false;" style="color: var(--accent);">Resend OTP</a></div>
+        <label class="form-label">OTP sent to <span id="maskedMobile"></span></label>
+        <input type="text" id="otpInput" class="form-input" placeholder="Enter 6-digit OTP" maxlength="6">
+        <div class="form-hint"><a href="#" onclick="goBack(); return false;" style="color: var(--accent);">Change number</a></div>
       </div>
-      <button class="btn btn-primary btn-block" id="verifyBtn" onclick="verifyOTP()">Verify & Login</button>
+      <button class="btn btn-primary btn-block" onclick="verifyOTP()">Verify & Login</button>
     </div>
 
-    <!-- Step 3: Name (new users) -->
     <div class="step" id="step3">
       <div class="form-group">
         <label class="form-label">Your Full Name <span>*</span></label>
         <input type="text" id="nameInput" class="form-input" placeholder="Enter your name">
       </div>
       <div class="form-group">
-        <label class="form-label">Email Address <span style="color: var(--text-3);">(optional)</span></label>
+        <label class="form-label">Email Address <span style="color:var(--text-3);">(optional)</span></label>
         <input type="email" id="emailInput" class="form-input" placeholder="you@example.com">
-        <div class="form-hint">For order confirmations and receipts</div>
       </div>
       <button class="btn btn-primary btn-block" onclick="completeRegistration()">Create Account →</button>
     </div>
 
-    <div class="divider"><span>or</span></div>
-    <button class="btn btn-secondary btn-block" onclick="openSignupModal()" style="margin-bottom: 12px;">📝 Create New Account</button>
-    <a class="wa-login" href="https://wa.me/917891004042?text=Hi%2C%20I%20need%20help%20with%20my%20account" target="_blank">💬 Get help via WhatsApp</a>
+    <div class="divider"><span>OR</span></div>
+    
+    <!-- THIS IS THE BUTTON THAT SHOULD BE VISIBLE -->
+    <button class="btn btn-secondary btn-block" onclick="openSignupModal()" style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">
+      📝 Create New Account
+    </button>
+    
+    <a class="btn btn-outline btn-block" href="https://wa.me/917891004042" target="_blank" style="text-decoration: none;">
+      💬 Need Help? WhatsApp Us
+    </a>
   </div>
 </div>
 
-<!-- CREATE ACCOUNT MODAL -->
-<div id="signupModal" class="modal-overlay">
-  <div class="login-box" style="max-height: 85vh; overflow-y: auto;">
+<!-- SIGNUP MODAL -->
+<div id="signupModal" class="modal">
+  <div class="login-box" style="max-height: 90vh; overflow-y: auto;">
     <div style="text-align: right; margin-bottom: 16px;">
-      <button class="modal-close" onclick="closeSignupModal()">✕</button>
+      <button onclick="closeSignupModal()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text);">×</button>
     </div>
+    
     <h2 class="login-title">Create <span>Account</span></h2>
-    <p class="login-sub">Sign up with email & password</p>
-    <div id="signupAlertBox"></div>
+    <p class="login-sub">Register with email & password</p>
+    
+    <div id="signupAlert"></div>
     
     <div class="form-group">
       <label class="form-label">Full Name <span>*</span></label>
       <input type="text" id="signupName" class="form-input" placeholder="Your name">
     </div>
+    
     <div class="form-group">
-      <label class="form-label">Email Address <span>*</span></label>
+      <label class="form-label">Email <span>*</span></label>
       <input type="email" id="signupEmail" class="form-input" placeholder="you@example.com">
     </div>
+    
     <div class="form-group">
-      <label class="form-label">Mobile Number <span>*</span></label>
-      <div class="otp-row">
-        <div style="display: flex; align-items: center; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px; padding: 0 12px; font-size: 14px; color: var(--text-3);">+91</div>
-        <input type="tel" id="signupMobile" class="form-input" placeholder="10-digit mobile" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+      <label class="form-label">Mobile <span>*</span></label>
+      <div style="display: flex; gap: 8px;">
+        <div style="padding: 11px 12px; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px;">+91</div>
+        <input type="tel" id="signupMobile" class="form-input" placeholder="10-digit mobile" maxlength="10">
       </div>
     </div>
+    
     <div class="form-group">
       <label class="form-label">Password <span>*</span></label>
       <input type="password" id="signupPassword" class="form-input" placeholder="Min 6 characters">
-      <div class="form-hint">Use uppercase, numbers, special chars for security</div>
     </div>
+    
     <div class="form-group">
       <label class="form-label">Confirm Password <span>*</span></label>
       <input type="password" id="signupConfirm" class="form-input" placeholder="Re-enter password">
     </div>
     
-    <button class="btn btn-primary btn-block" onclick="registerNewAccount()" id="signupBtn">Create Account →</button>
+    <button class="btn btn-primary btn-block" onclick="registerAccount()">Create Account →</button>
+    
     <p style="text-align: center; font-size: 13px; color: var(--text-3); margin-top: 16px;">
       Already have account? <a href="#" onclick="closeSignupModal(); return false;" style="color: var(--accent); font-weight: 600;">Sign In</a>
     </p>
@@ -148,272 +138,134 @@
 </div>
 
 <script>
-  const API = '/api/auth.php';
-  let currentMobile = '';
-  let otpTimer = null;
+const API = '/api/auth.php';
+let currentMobile = '';
 
-  // Theme
-  const html = document.documentElement;
-  const lbl = document.getElementById('themeLabel');
-  const saved = localStorage.getItem('hw-theme') || 'light';
+// Theme
+const html = document.documentElement, lbl = document.getElementById('themeLabel');
+const saved = localStorage.getItem('hw-theme') || 'light';
+function setTheme(t) { html.setAttribute('data-theme', t); lbl.textContent = t === 'dark' ? 'Dark' : 'Light'; localStorage.setItem('hw-theme', t); }
+function toggleTheme() { setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+setTheme(saved);
+
+// Check if logged in
+if (localStorage.getItem('hw_token')) window.location.href = 'account.html';
+
+function showAlert(msg, type = 'error') {
+  const box = document.getElementById('alertBox');
+  box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => box.innerHTML = '', 5000);
+}
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+}
+
+function goBack() { showStep(1); }
+
+async function sendOTP() {
+  const mobile = document.getElementById('mobileInput').value.trim();
+  if (!mobile) { showAlert('Please enter mobile, email or username'); return; }
+  currentMobile = mobile;
   
-  function setTheme(t) {
-    html.setAttribute('data-theme', t);
-    lbl.textContent = t === 'dark' ? 'Dark' : 'Light';
-    localStorage.setItem('hw-theme', t);
-  }
+  try {
+    const res = await fetch(API + '?action=send_otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile })
+    });
+    const data = await res.json();
+    if (!data.success) { showAlert(data.error || 'Failed to send OTP'); return; }
+    document.getElementById('maskedMobile').textContent = mobile;
+    showStep(2);
+    showAlert('OTP sent!', 'success');
+  } catch (e) { showAlert('Network error'); }
+}
+
+async function verifyOTP() {
+  const otp = document.getElementById('otpInput').value.trim();
+  if (otp.length !== 6) { showAlert('Enter 6-digit OTP'); return; }
   
-  function toggleTheme() {
-    setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  }
+  try {
+    const res = await fetch(API + '?action=verify_otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: currentMobile, otp })
+    });
+    const data = await res.json();
+    if (data.needs_name) { showStep(3); return; }
+    if (!data.success) { showAlert(data.error || 'Invalid OTP'); return; }
+    loginSuccess(data);
+  } catch (e) { showAlert('Network error'); }
+}
 
-  setTheme(saved);
+async function completeRegistration() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { showAlert('Enter your name'); return; }
+  const email = document.getElementById('emailInput').value.trim();
+  const otp = document.getElementById('otpInput').value.trim();
+  
+  try {
+    const res = await fetch(API + '?action=verify_otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: currentMobile, otp, name, email })
+    });
+    const data = await res.json();
+    if (!data.success) { showAlert(data.error); return; }
+    loginSuccess(data);
+  } catch (e) { showAlert('Network error'); }
+}
 
-  // Check already logged in
-  if (localStorage.getItem('hw_token')) {
-    window.location.href = 'account.html';
-  }
+function loginSuccess(data) {
+  localStorage.setItem('hw_token', data.token);
+  localStorage.setItem('hw_user', JSON.stringify(data.user));
+  showAlert('Welcome! Redirecting...', 'success');
+  setTimeout(() => window.location.href = 'account.html', 1000);
+}
 
-  function showAlert(msg, type = 'error') {
-    const box = document.getElementById('alertBox');
-    box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-    setTimeout(() => box.innerHTML = '', 5000);
-  }
+// SIGNUP MODAL
+function openSignupModal() {
+  document.getElementById('signupModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
 
-  function showStep(n) {
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step' + n).classList.add('active');
-  }
+function closeSignupModal() {
+  document.getElementById('signupModal').classList.remove('show');
+  document.body.style.overflow = 'auto';
+}
 
-  function goBack() {
-    showStep(1);
-  }
+function showSignupAlert(msg, type = 'error') {
+  const box = document.getElementById('signupAlert');
+  box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => box.innerHTML = '', 5000);
+}
 
-  async function sendOTP(isResend = false) {
-    const mobile = document.getElementById('mobileInput').value.trim();
-    if (mobile.length !== 10) {
-      showAlert('Enter a valid 10-digit mobile number');
-      return;
-    }
-    
-    currentMobile = mobile;
-    const btn = document.getElementById('sendOtpBtn');
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-
-    try {
-      const res = await fetch(API + '?action=send_otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile })
-      });
-      const data = await res.json();
-      
-      if (!data.success) {
-        showAlert(data.error || 'Failed to send OTP');
-        btn.disabled = false;
-        btn.textContent = 'Send OTP';
-        return;
-      }
-      
-      document.getElementById('maskedMobile').textContent = mobile.substring(0, 2) + 'XXXXXX' + mobile.substring(8);
-      showStep(2);
-      showAlert('OTP sent successfully!', 'success');
-      startTimer(data.expires_in || 600);
-    } catch (e) {
-      showAlert('Network error. Try again.');
-      btn.disabled = false;
-      btn.textContent = 'Send OTP';
-    }
-  }
-
-  function startTimer(seconds) {
-    clearInterval(otpTimer);
-    const el = document.getElementById('timer');
-    let s = seconds;
-    otpTimer = setInterval(() => {
-      s--;
-      if (s <= 0) {
-        clearInterval(otpTimer);
-        el.textContent = '';
-        return;
-      }
-      const m = Math.floor(s / 60);
-      const sec = s % 60;
-      el.textContent = `OTP expires in ${m}:${sec.toString().padStart(2, '0')}`;
-    }, 1000);
-  }
-
-  async function verifyOTP() {
-    const otp = document.getElementById('otpInput').value.trim();
-    if (otp.length !== 6) {
-      showAlert('Enter the 6-digit OTP');
-      return;
-    }
-    
-    const btn = document.getElementById('verifyBtn');
-    btn.disabled = true;
-    btn.textContent = 'Verifying...';
-
-    try {
-      const res = await fetch(API + '?action=verify_otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile: currentMobile, otp })
-      });
-      const data = await res.json();
-      
-      if (data.needs_name) {
-        showStep(3);
-        btn.disabled = false;
-        btn.textContent = 'Verify & Login';
-        return;
-      }
-      
-      if (!data.success) {
-        showAlert(data.error || 'Invalid OTP');
-        btn.disabled = false;
-        btn.textContent = 'Verify & Login';
-        return;
-      }
-      
-      loginSuccess(data);
-    } catch (e) {
-      showAlert('Network error. Try again.');
-      btn.disabled = false;
-      btn.textContent = 'Verify & Login';
-    }
-  }
-
-  async function completeRegistration() {
-    const name = document.getElementById('nameInput').value.trim();
-    const email = document.getElementById('emailInput').value.trim();
-    if (!name) {
-      showAlert('Please enter your name');
-      return;
-    }
-    
-    const otp = document.getElementById('otpInput').value.trim();
-
-    try {
-      const res = await fetch(API + '?action=verify_otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile: currentMobile, otp, name, email })
-      });
-      const data = await res.json();
-      
-      if (!data.success) {
-        showAlert(data.error || 'Error creating account');
-        return;
-      }
-      
-      loginSuccess(data);
-    } catch (e) {
-      showAlert('Network error. Try again.');
-    }
-  }
-
-  function loginSuccess(data) {
-    localStorage.setItem('hw_token', data.token);
-    localStorage.setItem('hw_user', JSON.stringify(data.user));
-    showAlert('Welcome to HarmaalWale! Redirecting...', 'success');
-    const redirect = new URLSearchParams(window.location.search).get('redirect') || 'account.html';
-    setTimeout(() => window.location.href = redirect, 1200);
-  }
-
-  // SIGNUP MODAL FUNCTIONS
-  function openSignupModal() {
-    document.getElementById('signupModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeSignupModal() {
-    document.getElementById('signupModal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-    document.getElementById('signupName').value = '';
-    document.getElementById('signupEmail').value = '';
-    document.getElementById('signupMobile').value = '';
-    document.getElementById('signupPassword').value = '';
-    document.getElementById('signupConfirm').value = '';
-    document.getElementById('signupAlertBox').innerHTML = '';
-  }
-
-  function showSignupAlert(msg, type = 'error') {
-    const box = document.getElementById('signupAlertBox');
-    box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-    if (type === 'error') setTimeout(() => box.innerHTML = '', 5000);
-  }
-
-  async function registerNewAccount() {
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const mobile = document.getElementById('signupMobile').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const confirm = document.getElementById('signupConfirm').value;
-
-    if (!name || !email || !mobile || !password || !confirm) {
-      showSignupAlert('All fields required');
-      return;
-    }
-    
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showSignupAlert('Invalid email address');
-      return;
-    }
-    
-    if (mobile.length !== 10) {
-      showSignupAlert('Enter valid 10-digit mobile');
-      return;
-    }
-    
-    if (password.length < 6) {
-      showSignupAlert('Password must be at least 6 characters');
-      return;
-    }
-    
-    if (password !== confirm) {
-      showSignupAlert('Passwords do not match');
-      return;
-    }
-
-    const btn = document.getElementById('signupBtn');
-    btn.disabled = true;
-    btn.textContent = 'Creating...';
-
-    try {
-      const res = await fetch(API + '?action=register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, mobile, password })
-      });
-      const data = await res.json();
-      
-      if (!data.success) {
-        showSignupAlert(data.error || 'Registration failed');
-        btn.disabled = false;
-        btn.textContent = 'Create Account →';
-        return;
-      }
-
-      showSignupAlert('Account created! Check your email to verify. Redirecting to login...', 'success');
-      setTimeout(() => {
-        closeSignupModal();
-        document.getElementById('mobileInput').value = mobile;
-      }, 2000);
-    } catch (e) {
-      showSignupAlert('Network error. Try again.');
-      btn.disabled = false;
-      btn.textContent = 'Create Account →';
-    }
-  }
-
-  // Close modal on background click
-  document.getElementById('signupModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-      closeSignupModal();
-    }
-  });
+async function registerAccount() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const mobile = document.getElementById('signupMobile').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  
+  if (!name || !email || !mobile || !password) { showSignupAlert('All fields required'); return; }
+  if (mobile.length !== 10) { showSignupAlert('Enter valid 10-digit mobile'); return; }
+  if (password.length < 6) { showSignupAlert('Password min 6 characters'); return; }
+  if (password !== confirm) { showSignupAlert('Passwords do not match'); return; }
+  
+  try {
+    const res = await fetch(API + '?action=register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, mobile, password })
+    });
+    const data = await res.json();
+    if (!data.success) { showSignupAlert(data.error); return; }
+    showSignupAlert('Account created! Check email to verify.', 'success');
+    setTimeout(() => closeSignupModal(), 2000);
+  } catch (e) { showSignupAlert('Network error'); }
+}
 </script>
 
 </body>

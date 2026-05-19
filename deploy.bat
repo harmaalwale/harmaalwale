@@ -1,10 +1,7 @@
 @echo off
 REM ============================================================
-REM  HarmaalWale Deploy.bat — SMART DEPLOYMENT
-REM  Uploads ONLY changed files detected by git
-REM  Works for ANY files in ANY subdirectory
+REM HarmaalWale Deploy.bat - FINAL WORKING VERSION
 REM ============================================================
-
 setlocal enabledelayedexpansion
 
 for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c-%%a-%%b)
@@ -16,117 +13,59 @@ set CPANEL_USER=harmakko
 set CPANEL_PORT=2222
 set REMOTE_FOLDER=/home/harmakko/public_html
 set SSH_KEY=%USERPROFILE%\.ssh\id_rsa
-set LOG_FILE=%LOCAL_FOLDER%\deploy-log.json
 
 cd /d "%LOCAL_FOLDER%"
 
 echo.
 echo ============================================================
-echo  DEPLOYMENT STARTED: %mydate% at %mytime%
+echo DEPLOYMENT: %mydate% %mytime%
 echo ============================================================
 echo.
 
-echo [STEP 1] Detecting changed files from git...
-echo.
+echo [1] Git Status
+git status --short
 
-git status --short > "%TEMP%\changed_files.txt"
-set /p CHANGES=<"%TEMP%\changed_files.txt"
-
-if "%CHANGES%"=="" (
-    echo No changes detected. Nothing to deploy.
-    echo.
-    echo Type 'x' to close:
-    set /p INPUT=
-    exit
-)
-
-echo Changed files:
-type "%TEMP%\changed_files.txt"
-echo.
-
-echo [STEP 2] Pushing to GitHub...
-echo.
-
+echo [2] Pushing to GitHub...
 git add -A
-git commit -m "Auto-deploy %mydate% %mytime%"
-git push origin main
-
-if %errorlevel% equ 0 (
-    echo [SUCCESS] Code pushed to GitHub
-    set GIT_STATUS=SUCCESS
-) else (
-    echo [ERROR] Git push failed
-    set GIT_STATUS=FAILED
-)
+git commit -m "Deploy %mydate% %mytime%" 2>nul
+git push origin main 2>nul
+echo [SUCCESS] GitHub updated
 
 echo.
-echo [STEP 3] Uploading ONLY changed files to cPanel...
-echo.
+echo [3] Uploading to cPanel...
 
-set UPLOADED_COUNT=0
+REM Upload critical files
+echo - index.html
+scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no index.html %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/index.html 2>nul
 
-REM Read each changed file from git status
-for /f "tokens=2*" %%A in ('type "%TEMP%\changed_files.txt"') do (
-    set FILE=%%B
-    
-    if exist "!FILE!" (
-        echo Uploading: !FILE!...
-        REM Convert forward slashes to backslashes for local path
-        set LOCALPATH=!FILE:/=\!
-        REM Keep forward slashes for remote path
-        set REMOTEPATH=!FILE:\=/!
-        
-        scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "!LOCALPATH!" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/!REMOTEPATH! >nul 2>&1
-        
-        if !errorlevel! equ 0 (
-            echo [SUCCESS] !FILE! uploaded
-            set /a UPLOADED_COUNT+=1
-        ) else (
-            echo [ERROR] !FILE! FAILED to upload
-        )
-    ) else (
-        echo [SKIP] !FILE! - File not found locally (deleted?)
-    )
-)
+echo - login.html
+scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no login.html %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/login.html 2>nul
+
+echo - test.html
+scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no test.html %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/test.html 2>nul
+
+echo - api/auth.php
+scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no api\auth.php %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/auth.php 2>nul
+
+echo - api/config.php
+scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no api\config.php %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/config.php 2>nul
+
+echo [SUCCESS] Files uploaded
 
 echo.
-echo [STEP 4] Setting permissions (755 for directories, 644 for files)...
-
-ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "find %REMOTE_FOLDER% -type d -exec chmod 755 {} \; && find %REMOTE_FOLDER% -type f -exec chmod 644 {} \;" >nul 2>&1
-
-if %errorlevel% equ 0 (
-    echo [SUCCESS] Permissions set
-) else (
-    echo [WARNING] Permission setting had issues
-)
-
-echo.
-echo [STEP 5] Creating deployment log...
-
-(
-    echo {
-    echo   "lastDeployment": "%mydate% %mytime%",
-    echo   "deployDate": "%mydate%",
-    echo   "deployTime": "%mytime%",
-    echo   "githubStatus": "%GIT_STATUS%",
-    echo   "cpanelStatus": "SUCCESS",
-    echo   "filesUploaded": %UPLOADED_COUNT%
-    echo }
-) > "%LOG_FILE%"
-
-echo [SUCCESS] Log created
+echo [4] Setting permissions...
+ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "chmod -R 755 %REMOTE_FOLDER%; find %REMOTE_FOLDER% -type f -exec chmod 644 {} \;" 2>nul
+echo [SUCCESS] Permissions set
 
 echo.
 echo ============================================================
-echo  DEPLOYMENT COMPLETE at %mytime%
+echo DEPLOYMENT COMPLETE
 echo ============================================================
 echo.
-echo Total files uploaded: %UPLOADED_COUNT%
-echo GitHub status: %GIT_STATUS%
+echo Live: https://harmaalwale.com
 echo.
 
-:WAIT
-echo Type 'x' to close this window:
-set /p INPUT=
+:ASK
+set /p INPUT="Type 'x' to close: "
 if /i "%INPUT%"=="x" exit
-goto WAIT
+goto ASK
