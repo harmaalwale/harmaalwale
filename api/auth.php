@@ -1,14 +1,21 @@
 <?php
 // ============================================================
-//  HarmaalWale — Auth API
-//  Supports BOTH: Mobile OTP  +  Email/Password
+//  HarmaalWale — Auth API (COMPLETE)
+//  Supports: Mobile OTP + Email/Password + Email Verification
 //
+//  STEP 1 - CREATE ACCOUNT (Email/Password):
+//  POST ?action=register        → register with email + password
+//  GET  ?action=verify_email    → verify email link (from email)
+//  POST ?action=resend_verify   → resend verification email
+//
+//  STEP 2 - LOGIN (Mobile OTP):
 //  POST ?action=send_otp        → send OTP to mobile
 //  POST ?action=verify_otp      → verify OTP → login/register
-//  POST ?action=register        → email + password register
+//
+//  STEP 3 - LOGIN (Email/Password):
 //  POST ?action=login           → email/mobile + password login
-//  POST ?action=verify_email    → verify email token
-//  POST ?action=resend_verify   → resend verification email
+//
+//  BONUS:
 //  POST ?action=forgot_password → send reset link
 //  POST ?action=reset_password  → reset with token
 //  POST ?action=update_profile  → update profile + GPS location
@@ -61,92 +68,7 @@ if ($method === 'GET' && $action === 'me') {
 }
 
 // ============================================================
-//  POST send_otp  — Mobile OTP login
-// ============================================================
-if ($method === 'POST' && $action === 'send_otp') {
-    $mobile = preg_replace('/[^0-9]/', '', $body['mobile'] ?? '');
-    if (strlen($mobile) !== 10) jsonResponse(['error' => 'Enter valid 10-digit mobile number'], 400);
-
-    $db  = getDB();
-    $otp = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
-    $exp = date('Y-m-d H:i:s', time() + (OTP_EXPIRY * 60));
-
-    $db->query("UPDATE otp_codes SET used=1 WHERE mobile='" . $db->real_escape_string($mobile) . "' AND used=0");
-    $stmt = $db->prepare("INSERT INTO otp_codes (mobile,code,purpose,expires_at) VALUES (?,?,'login',?)");
-    $stmt->bind_param('sss', $mobile, $otp, $exp);
-    $stmt->execute();
-    $db->close();
-
-    $sent = sendOTP($mobile, $otp);
-    if (!$sent) jsonResponse(['error' => 'Failed to send OTP. Try again.'], 500);
-
-    jsonResponse(['success' => true, 'message' => 'OTP sent to +91' . substr($mobile, 0, 2) . 'XXXXXXXX', 'expires_in' => OTP_EXPIRY * 60]);
-}
-
-// ============================================================
-//  POST verify_otp
-// ============================================================
-if ($method === 'POST' && $action === 'verify_otp') {
-    $mobile = preg_replace('/[^0-9]/', '', $body['mobile'] ?? '');
-    $code   = trim($body['otp'] ?? '');
-    $name   = trim($body['name'] ?? '');
-
-    if (strlen($mobile) !== 10 || strlen($code) !== 6)
-        jsonResponse(['error' => 'Invalid mobile or OTP'], 400);
-
-    $db   = getDB();
-    $stmt = $db->prepare("SELECT id FROM otp_codes WHERE mobile=? AND code=? AND used=0 AND expires_at>NOW() ORDER BY id DESC LIMIT 1");
-    $stmt->bind_param('ss', $mobile, $code);
-    $stmt->execute();
-    $otpRow = $stmt->get_result()->fetch_assoc();
-
-    if (!$otpRow) { $db->close(); jsonResponse(['error' => 'Invalid or expired OTP'], 400); }
-    $db->query("UPDATE otp_codes SET used=1 WHERE id=" . intval($otpRow['id']));
-
-    // Find or create user
-    $stmt = $db->prepare("SELECT id,name,email,mobile,role,avatar FROM users WHERE mobile=? LIMIT 1");
-    $stmt->bind_param('s', $mobile);
-    $stmt->execute();
-    $user  = $stmt->get_result()->fetch_assoc();
-    $isNew = false;
-
-    if (!$user) {
-        if (!$name) { $db->close(); jsonResponse(['success' => false, 'needs_name' => true, 'message' => 'Enter your name to complete registration']); }
-        $stmt = $db->prepare("INSERT INTO users (name,mobile,mobile_verified,role) VALUES (?,?,1,'user')");
-        $stmt->bind_param('ss', $name, $mobile);
-        $stmt->execute();
-        $userId = $db->insert_id;
-        $isNew  = true;
-
-        // Welcome email if email provided
-        if (!empty($body['email'])) {
-            $email = $body['email'];
-            $upd = $db->prepare("UPDATE users SET email=? WHERE id=?");
-            $upd->bind_param('si', $email, $userId);
-            $upd->execute();
-            $html = emailTemplate('Welcome to HarmaalWale!', "<p>Hi <strong>" . htmlspecialchars($name) . "</strong>,</p><p>Welcome to HarmaalWale! Your account is ready.</p><a href='" . SITE_URL . "' class='btn'>Start Shopping →</a>");
-            sendEmail($email, 'Welcome to HarmaalWale! 🎉', $html);
-        }
-
-        $stmt = $db->prepare("SELECT id,name,email,mobile,role,avatar FROM users WHERE id=?");
-        $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $user = $stmt->get_result()->fetch_assoc();
-    } else {
-        $userId = $user['id'];
-        $db->query("UPDATE users SET mobile_verified=1, last_login=NOW() WHERE id=" . intval($userId));
-    }
-
-    logLogin($db, $userId, 'otp');
-    $token = createToken($userId, $mobile, $user['role'] ?? 'user');
-    $db->close();
-
-    jsonResponse(['success' => true, 'token' => $token, 'user' => $user, 'is_new' => $isNew,
-        'message' => $isNew ? 'Account created successfully!' : 'Logged in successfully!']);
-}
-
-// ============================================================
-//  POST register  — Email + Password
+//  POST register  — Email + Password (STEP 1)
 // ============================================================
 if ($method === 'POST' && $action === 'register') {
     $name  = trim($body['name']  ?? '');
@@ -170,12 +92,11 @@ if ($method === 'POST' && $action === 'register') {
     $token = bin2hex(random_bytes(32));
     $exp   = date('Y-m-d H:i:s', time() + 86400);
 
-    $stmt = $db->prepare("INSERT INTO users (name,email,mobile,password_hash,role,email_verified) VALUES (?,?,?,?,'user',0)");
+    $stmt = $db->prepare("INSERT INTO users (name,email,mobile,password_hash,role) VALUES (?,?,?,?,'user')");
     $stmt->bind_param('ssss', $name, $email, $mobile, $hash);
     $stmt->execute();
     $userId = $db->insert_id;
 
-    // Save verification token
     $v = $db->prepare("INSERT INTO email_verifications (user_id,token,expires_at) VALUES (?,?,?)");
     $v->bind_param('iss', $userId, $token, $exp);
     $v->execute();
@@ -193,7 +114,7 @@ if ($method === 'POST' && $action === 'register') {
 }
 
 // ============================================================
-//  GET verify_email
+//  GET verify_email (STEP 1 COMPLETE)
 // ============================================================
 if ($method === 'GET' && $action === 'verify_email') {
     header('Content-Type: text/html');
@@ -256,7 +177,92 @@ if ($method === 'POST' && $action === 'resend_verify') {
 }
 
 // ============================================================
-//  POST login  — Email/Mobile + Password (unified)
+//  POST send_otp  — Mobile OTP login (STEP 2)
+// ============================================================
+if ($method === 'POST' && $action === 'send_otp') {
+    $mobile = preg_replace('/[^0-9]/', '', $body['mobile'] ?? '');
+    if (strlen($mobile) !== 10) jsonResponse(['error' => 'Enter valid 10-digit mobile number'], 400);
+
+    $db  = getDB();
+    $otp = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+    $exp = date('Y-m-d H:i:s', time() + (OTP_EXPIRY * 60));
+
+    $db->query("UPDATE otp_codes SET used=1 WHERE mobile='" . $db->real_escape_string($mobile) . "' AND used=0");
+    $stmt = $db->prepare("INSERT INTO otp_codes (mobile,code,purpose,expires_at) VALUES (?,?,'login',?)");
+    $stmt->bind_param('sss', $mobile, $otp, $exp);
+    $stmt->execute();
+    $db->close();
+
+    $sent = sendOTP($mobile, $otp);
+    if (!$sent) jsonResponse(['error' => 'Failed to send OTP. Try again.'], 500);
+
+    jsonResponse(['success' => true, 'message' => 'OTP sent to +91' . substr($mobile, 0, 2) . 'XXXXXXXX', 'expires_in' => OTP_EXPIRY * 60]);
+}
+
+// ============================================================
+//  POST verify_otp (STEP 2 COMPLETE)
+// ============================================================
+if ($method === 'POST' && $action === 'verify_otp') {
+    $mobile = preg_replace('/[^0-9]/', '', $body['mobile'] ?? '');
+    $code   = trim($body['otp'] ?? '');
+    $name   = trim($body['name'] ?? '');
+
+    if (strlen($mobile) !== 10 || strlen($code) !== 6)
+        jsonResponse(['error' => 'Invalid mobile or OTP'], 400);
+
+    $db   = getDB();
+    $stmt = $db->prepare("SELECT id FROM otp_codes WHERE mobile=? AND code=? AND used=0 AND expires_at>NOW() ORDER BY id DESC LIMIT 1");
+    $stmt->bind_param('ss', $mobile, $code);
+    $stmt->execute();
+    $otpRow = $stmt->get_result()->fetch_assoc();
+
+    if (!$otpRow) { $db->close(); jsonResponse(['error' => 'Invalid or expired OTP'], 400); }
+    $db->query("UPDATE otp_codes SET used=1 WHERE id=" . intval($otpRow['id']));
+
+    // Find or create user
+    $stmt = $db->prepare("SELECT id,name,email,mobile,role,avatar FROM users WHERE mobile=? LIMIT 1");
+    $stmt->bind_param('s', $mobile);
+    $stmt->execute();
+    $user  = $stmt->get_result()->fetch_assoc();
+    $isNew = false;
+
+    if (!$user) {
+        if (!$name) { $db->close(); jsonResponse(['success' => false, 'needs_name' => true, 'message' => 'Enter your name to complete registration']); }
+        $stmt = $db->prepare("INSERT INTO users (name,mobile,mobile_verified,role) VALUES (?,?,1,'user')");
+        $stmt->bind_param('ss', $name, $mobile);
+        $stmt->execute();
+        $userId = $db->insert_id;
+        $isNew  = true;
+
+        // Welcome email if email provided
+        if (!empty($body['email'])) {
+            $email = $body['email'];
+            $upd = $db->prepare("UPDATE users SET email=?,email_verified=1 WHERE id=?");
+            $upd->bind_param('si', $email, $userId);
+            $upd->execute();
+            $html = emailTemplate('Welcome to HarmaalWale!', "<p>Hi <strong>" . htmlspecialchars($name) . "</strong>,</p><p>Welcome to HarmaalWale! Your account is ready.</p><a href='" . SITE_URL . "' class='btn'>Start Shopping →</a>");
+            sendEmail($email, 'Welcome to HarmaalWale! 🎉', $html);
+        }
+
+        $stmt = $db->prepare("SELECT id,name,email,mobile,role,avatar FROM users WHERE id=?");
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+    } else {
+        $userId = $user['id'];
+        $db->query("UPDATE users SET mobile_verified=1, last_login=NOW() WHERE id=" . intval($userId));
+    }
+
+    logLogin($db, $userId, 'otp');
+    $token = createToken($userId, $mobile, $user['role'] ?? 'user');
+    $db->close();
+
+    jsonResponse(['success' => true, 'token' => $token, 'user' => $user, 'is_new' => $isNew,
+        'message' => $isNew ? 'Account created successfully!' : 'Logged in successfully!']);
+}
+
+// ============================================================
+//  POST login  — Email/Mobile + Password (STEP 3)
 // ============================================================
 if ($method === 'POST' && $action === 'login') {
     $identifier = trim($body['identifier'] ?? '');
@@ -305,6 +311,73 @@ if ($method === 'POST' && $action === 'login') {
     $token = createToken($user['id'], $user['email'] ?? $user['mobile'], $user['role']);
     unset($user['password_hash']);
     jsonResponse(['success' => true, 'token' => $token, 'user' => $user, 'message' => 'Logged in successfully!']);
+}
+
+// ============================================================
+//  POST forgot_password  — Send reset link
+// ============================================================
+if ($method === 'POST' && $action === 'forgot_password') {
+    $identifier = trim($body['identifier'] ?? '');
+    if (!$identifier) jsonResponse(['error' => 'Email or mobile required'], 400);
+
+    $db = getDB();
+    $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+    
+    if ($isEmail) {
+        $stmt = $db->prepare("SELECT id,name,email FROM users WHERE email=? LIMIT 1");
+        $stmt->bind_param('s', $identifier);
+    } else {
+        $cleanM = preg_replace('/\D/', '', $identifier);
+        $stmt = $db->prepare("SELECT id,name,email FROM users WHERE mobile=? LIMIT 1");
+        $stmt->bind_param('s', $cleanM);
+    }
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+
+    if (!$user || !$user['email']) { $db->close(); jsonResponse(['error' => 'Account not found'], 404); }
+
+    $token = bin2hex(random_bytes(32));
+    $exp   = date('Y-m-d H:i:s', time() + 3600);
+    $reset = $db->prepare("INSERT INTO password_resets (user_id,token,expires_at) VALUES (?,?,?)");
+    $reset->bind_param('iss', $user['id'], $token, $exp);
+    $reset->execute();
+    $db->close();
+
+    $link = SITE_URL . '/api/auth.php?action=reset_password&token=' . $token;
+    $html = emailTemplate('Reset Your Password',
+        "<p>Hi <strong>" . htmlspecialchars($user['name']) . "</strong>,</p>
+         <p>Click below to reset your HarmaalWale password:</p>
+         <a href='$link' class='btn'>Reset Password →</a>
+         <p style='font-size:12px;color:#aaa'>This link expires in 1 hour.</p>");
+    sendEmail($user['email'], 'HarmaalWale — Reset Your Password', $html);
+
+    jsonResponse(['success' => true, 'message' => 'Reset link sent to your email.']);
+}
+
+// ============================================================
+//  POST reset_password
+// ============================================================
+if ($method === 'POST' && $action === 'reset_password') {
+    $token = trim($body['token'] ?? '');
+    $password = $body['password'] ?? '';
+
+    if (!$token || !$password) jsonResponse(['error' => 'Token and password required'], 400);
+    if (strlen($password) < 6) jsonResponse(['error' => 'Password must be at least 6 characters'], 400);
+
+    $db   = getDB();
+    $stmt = $db->prepare("SELECT user_id FROM password_resets WHERE token=? AND used=0 AND expires_at>NOW() LIMIT 1");
+    $stmt->bind_param('s', $token);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+
+    if (!$row) { $db->close(); jsonResponse(['error' => 'Invalid or expired reset link'], 400); }
+
+    $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 8]);
+    $db->query("UPDATE users SET password_hash='" . $db->real_escape_string($hash) . "' WHERE id=" . intval($row['user_id']));
+    $db->query("UPDATE password_resets SET used=1 WHERE token='" . $db->real_escape_string($token) . "'");
+    $db->close();
+
+    jsonResponse(['success' => true, 'message' => 'Password reset successfully! Sign in with your new password.']);
 }
 
 // ============================================================
