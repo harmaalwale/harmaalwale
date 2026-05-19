@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HarmaalWale Deployment Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hw.css">
+  <style>
+    .tracker-wrap { min-height: calc(100vh - 66px); padding: 40px 20px; background: var(--bg); }
+    .tracker-container { max-width: 1000px; margin: 0 auto; }
+    .tracker-title { font-family: 'Barlow Condensed'; font-size: 32px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+    .tracker-title span { color: var(--accent); }
+    .tracker-sub { color: var(--text-3); margin-bottom: 32px; font-size: 14px; }
+    
+    .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .status-card { background: var(--bg-2); border: 1.5px solid var(--border); border-radius: 12px; padding: 24px; }
+    .status-card h3 { font-size: 14px; font-weight: 600; color: var(--text-3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .status-value { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+    .badge-success { background: #f0fdf4; color: #15803d; }
+    .badge-failed { background: #fef2f2; color: #b91c1c; }
+    .badge-pending { background: #eff6ff; color: #1d4ed8; }
+    
+    .deploy-history { background: var(--bg-2); border: 1.5px solid var(--border); border-radius: 12px; padding: 24px; }
+    .history-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+    .history-item { padding: 16px; border-left: 3px solid var(--accent); background: var(--bg-3); border-radius: 6px; margin-bottom: 12px; }
+    .history-file { font-weight: 600; color: var(--text); font-size: 14px; }
+    .history-time { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+    .history-status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-top: 8px; background: #f0fdf4; color: #15803d; }
+    
+    .last-sync { font-size: 13px; color: var(--text-3); margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; }
+    
+    [data-theme="dark"] .badge-success { background: #0d2818; color: #4ade80; }
+    [data-theme="dark"] .badge-failed { background: #2d0e0e; color: #f87171; }
+    [data-theme="dark"] .badge-pending { background: #0e1a2d; color: #60a5fa; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label" id="themeLabel">Light</span>
+    </div>
+  </div>
+</nav>
+
+<div class="tracker-wrap">
+  <div class="tracker-container">
+    <h1 class="tracker-title">Deployment <span>Tracker</span></h1>
+    <p class="tracker-sub">Live deployment status and history</p>
+    
+    <div class="status-grid">
+      <div class="status-card">
+        <h3>Last Deployment</h3>
+        <div class="status-value" id="lastDeploy">--</div>
+        <span class="status-badge badge-pending" id="deployBadge">Checking...</span>
+      </div>
+      
+      <div class="status-card">
+        <h3>GitHub Status</h3>
+        <div class="status-value" id="githubStatus">--</div>
+        <span class="status-badge badge-pending" id="githubBadge">Checking...</span>
+      </div>
+      
+      <div class="status-card">
+        <h3>cPanel Status</h3>
+        <div class="status-value" id="cpanelStatus">--</div>
+        <span class="status-badge badge-pending" id="cpanelBadge">Checking...</span>
+      </div>
+    </div>
+    
+    <div class="deploy-history">
+      <h2 class="history-title">📁 Files Deployed</h2>
+      <div id="filesContainer">
+        <p style="color: var(--text-3); text-align: center;">Loading deployment history...</p>
+      </div>
+      
+      <div class="last-sync">
+        <p>Page auto-refreshes every 5 seconds</p>
+        <p id="lastSync" style="font-size: 12px; margin-top: 8px;">Last updated: --</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme
+  const html = document.documentElement, lbl = document.getElementById('themeLabel');
+  const saved = localStorage.getItem('hw-theme') || 'light';
+  setTheme(saved);
+  function setTheme(t) { html.setAttribute('data-theme', t); lbl.textContent = t === 'dark' ? 'Dark' : 'Light'; localStorage.setItem('hw-theme', t); }
+  function toggleTheme() { setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+
+  // Load deployment log
+  async function loadDeploymentLog() {
+    try {
+      const response = await fetch('deploy-log.json?t=' + Date.now());
+      const data = await response.json();
+      
+      // Update status cards
+      document.getElementById('lastDeploy').textContent = data.lastDeployment || '--';
+      document.getElementById('githubStatus').textContent = data.githubStatus || '--';
+      document.getElementById('cpanelStatus').textContent = data.cpanelStatus || '--';
+      
+      // Update badges
+      document.getElementById('deployBadge').className = 'status-badge ' + (data.cpanelStatus === 'SUCCESS' ? 'badge-success' : 'badge-failed');
+      document.getElementById('deployBadge').textContent = data.cpanelStatus === 'SUCCESS' ? '✓ SUCCESS' : '✗ FAILED';
+      
+      document.getElementById('githubBadge').className = 'status-badge ' + (data.githubStatus === 'SUCCESS' ? 'badge-success' : 'badge-failed');
+      document.getElementById('githubBadge').textContent = data.githubStatus === 'SUCCESS' ? '✓ PUSHED' : '✗ FAILED';
+      
+      document.getElementById('cpanelBadge').className = 'status-badge ' + (data.cpanelStatus === 'SUCCESS' ? 'badge-success' : 'badge-failed');
+      document.getElementById('cpanelBadge').textContent = data.cpanelStatus === 'SUCCESS' ? '✓ UPLOADED' : '✗ FAILED';
+      
+      // Build files list
+      let filesHTML = '';
+      if (data.filesDeployed && data.filesDeployed.length > 0) {
+        data.filesDeployed.forEach(file => {
+          filesHTML += `
+            <div class="history-item">
+              <div class="history-file">📄 ${file.name}</div>
+              <div class="history-time">Location: ${file.location}</div>
+              <div class="history-time">Deployed at: ${file.time}</div>
+              <div class="history-status">${file.status.toUpperCase()}</div>
+            </div>
+          `;
+        });
+      }
+      
+      document.getElementById('filesContainer').innerHTML = filesHTML;
+      
+      // Update last sync time
+      const now = new Date();
+      document.getElementById('lastSync').textContent = 'Last updated: ' + now.toLocaleString();
+      
+    } catch (error) {
+      document.getElementById('filesContainer').innerHTML = '<p style="color: var(--text-3); text-align: center;">Waiting for first deployment...</p>';
+    }
+  }
+
+  // Load on page load
+  loadDeploymentLog();
+
+  // Auto-refresh every 5 seconds
+  setInterval(loadDeploymentLog, 5000);
+</script>
+
+</body>
+</html>
