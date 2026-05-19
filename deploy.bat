@@ -1,56 +1,63 @@
 @echo off
 REM ============================================================
 REM  HarmaalWale Deploy.bat — Local → GitHub → cPanel
+REM  Pushes to GitHub + Shows Status (NO AUTO-CLOSE)
 REM ============================================================
 
 setlocal enabledelayedexpansion
 
+REM Get timestamp
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c-%%a-%%b)
+for /f "tokens=1-2 delims=/:" %%a in ('time /t') do (set mytime=%%a%%b)
+
 REM ── CONFIGURATION ──────────────────────────────────────────
 set LOCAL_FOLDER=C:\Users\kauti\harmaalwale_v3
-set GITHUB_REPO=https://github.com/your_username/harmaalwale.git
 set CPANEL_HOST=harmaalwale.com
 set CPANEL_USER=harmakko
-set CPANEL_PASS=your_cpanel_password
-set REMOTE_PATH=/home/harmakko/public_html
+
+echo.
+echo ============================================================
+echo  DEPLOYMENT STARTED: %mydate% at %mytime%
+echo ============================================================
+echo.
 
 REM ── STEP 1: GIT PUSH ───────────────────────────────────────
-echo.
-echo ===== STEP 1: Pushing to GitHub =====
+echo [STEP 1] Pushing to GitHub...
 cd %LOCAL_FOLDER%
+
 git add -A
-git commit -m "Deploy %date% %time%"
+git commit -m "Auto-deploy %mydate% %mytime%"
 git push origin main
-if %errorlevel% neq 0 (
-    echo ERROR: Git push failed
-    pause
-    exit /b 1
+
+if %errorlevel% equ 0 (
+    echo.
+    echo [SUCCESS] ✓ Code pushed to GitHub at %mytime%
+    echo.
+) else (
+    echo.
+    echo [ERROR] ✗ Git push failed - check credentials
+    echo.
 )
-echo SUCCESS: Code pushed to GitHub
 
-REM ── STEP 2: UPLOAD TO CPANEL VIA SFTP ─────────────────────
+REM ── STEP 2: MANUAL CPANEL UPLOAD REMINDER ──────────────────
+echo [STEP 2] cPanel Upload Instructions:
 echo.
-echo ===== STEP 2: Uploading to cPanel =====
-
-REM Create SFTP batch file
-(
-    echo lcd %LOCAL_FOLDER%
-    echo open sftp://%CPANEL_USER%:%CPANEL_PASS%@%CPANEL_HOST%:22
-    echo cd %REMOTE_PATH%
-    echo put login.html login.html
-    echo put config.php api/config.php
-    echo put api/auth.php api/auth.php
-    echo quit
-) > sftp_commands.txt
-
-REM Run SFTP (requires WinSCP or similar)
-REM Using PuTTY PSCP (if installed)
-pscp -P 2222 -pw %CPANEL_PASS% %LOCAL_FOLDER%\login.html %CPANEL_USER%@%CPANEL_HOST%:/home/%CPANEL_USER%/public_html/
-pscp -P 2222 -pw %CPANEL_PASS% %LOCAL_FOLDER%\config.php %CPANEL_USER%@%CPANEL_HOST%:/home/%CPANEL_USER%/public_html/api/
-pscp -P 2222 -pw %CPANEL_PASS% %LOCAL_FOLDER%\api\auth.php %CPANEL_USER%@%CPANEL_HOST%:/home/%CPANEL_USER%/public_html/api/
-
-echo SUCCESS: Files uploaded to cPanel
-
-REM ── STEP 3: SET PERMISSIONS ───────────────────────────────
+echo 1. Open cPanel File Manager
+echo 2. Navigate to: /public_html/api/
+echo 3. Upload these files:
+echo    - login.html (to /public_html/)
+echo    - config.php (to /public_html/api/)
+echo    - auth.php (to /public_html/api/)
+echo 4. Set permissions: 644 for all files
 echo.
-echo ===== STEP 3: Setting Permissions =====
-REM
+
+REM ── COMPLETION ─────────────────────────────────────────────
+echo ============================================================
+echo  DEPLOYMENT STATUS: %mydate% %mytime%
+echo ============================================================
+echo.
+echo [✓] GitHub: PUSHED
+echo [○] cPanel: UPLOAD MANUALLY (see instructions above)
+echo.
+echo Press any key to close this window...
+pause
