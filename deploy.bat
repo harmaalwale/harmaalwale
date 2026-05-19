@@ -18,28 +18,41 @@ echo [1] Git Status
 git status --short
 echo.
 
-echo [2] Pushing to GitHub...
+echo [2] Pulling latest from GitHub...
+git pull origin main
+if %errorlevel% equ 0 (
+    echo [SUCCESS] Synced with GitHub
+) else (
+    echo [ERROR] Pull failed
+    pause
+    exit /b 1
+)
+
+echo.
+echo [3] Committing local changes...
 git add -A
 git commit -m "Deploy %mydate% %mytime%"
 if %errorlevel% equ 0 (
-    echo [SUCCESS] Commit created
+    echo [SUCCESS] Changes committed
 ) else (
-    echo [INFO] No changes to commit
+    echo [INFO] No new changes to commit
 )
 
+echo.
+echo [4] Pushing to GitHub...
 git push origin main
 if %errorlevel% equ 0 (
     echo [SUCCESS] Pushed to GitHub
     echo.
-    echo [3] GitHub Actions will auto-deploy to cPanel in 30 seconds
+    echo [5] GitHub Actions auto-deploying to cPanel...
     echo.
+    echo ============================================================
+    echo DONE! cPanel will sync in 30-60 seconds
+    echo ============================================================
 ) else (
-    echo [ERROR] Push failed - check GitHub connection
+    echo [ERROR] Push failed
 )
 
-echo ============================================================
-echo DONE! Changes sync to cPanel automatically
-echo ============================================================
 echo.
 
 :ASK
