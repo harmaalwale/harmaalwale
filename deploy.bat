@@ -1,7 +1,7 @@
 @echo off
 REM ============================================================
-REM  HarmaalWale Deploy.bat — Smart Deployment
-REM  Manual close only (no auto-close)
+REM  HarmaalWale Deploy.bat — Final Version
+REM  NO AUTO-CLOSE - Manual close only
 REM ============================================================
 
 setlocal enabledelayedexpansion
@@ -56,7 +56,7 @@ if %errorlevel% equ 0 (
     set GIT_STATUS=FAILED
     set GIT_TIME=%mytime%
     set DEPLOYMENT_SUCCESS=0
-    set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!Git push failed. Check GitHub credentials.
+    set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!Git push failed.
 )
 
 echo.
@@ -69,7 +69,6 @@ set CPANEL_STATUS=SUCCESS
 set CPANEL_TIME=%mytime%
 set DEPLOYED_FILES=
 
-REM Check and upload login.html if changed
 findstr /M "login.html" "%TEMP%\changed_files.txt" >nul 2>&1
 if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\login.html" (
@@ -86,14 +85,13 @@ if %errorlevel% equ 0 (
         ) else (
             echo [ERROR] ✗ login.html upload FAILED
             set DEPLOYMENT_SUCCESS=0
-            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!login.html upload failed. 
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!login.html upload failed.
         )
     )
 ) else (
     echo [SKIP] login.html - No changes
 )
 
-REM Check and upload test.html if changed
 findstr /M "test.html" "%TEMP%\changed_files.txt" >nul 2>&1
 if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\test.html" (
@@ -110,14 +108,13 @@ if %errorlevel% equ 0 (
         ) else (
             echo [ERROR] ✗ test.html upload FAILED
             set DEPLOYMENT_SUCCESS=0
-            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!test.html upload failed. 
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!test.html upload failed.
         )
     )
 ) else (
     echo [SKIP] test.html - No changes
 )
 
-REM Check and upload config.php if changed
 findstr /M "config.php" "%TEMP%\changed_files.txt" >nul 2>&1
 if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\api\config.php" (
@@ -134,14 +131,13 @@ if %errorlevel% equ 0 (
         ) else (
             echo [ERROR] ✗ config.php upload FAILED
             set DEPLOYMENT_SUCCESS=0
-            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!config.php upload failed. 
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!config.php upload failed.
         )
     )
 ) else (
     echo [SKIP] config.php - No changes
 )
 
-REM Check and upload auth.php if changed
 findstr /M "auth.php" "%TEMP%\changed_files.txt" >nul 2>&1
 if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\api\auth.php" (
@@ -158,7 +154,7 @@ if %errorlevel% equ 0 (
         ) else (
             echo [ERROR] ✗ auth.php upload FAILED
             set DEPLOYMENT_SUCCESS=0
-            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!auth.php upload failed. 
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!auth.php upload failed.
         )
     )
 ) else (
@@ -167,7 +163,7 @@ if %errorlevel% equ 0 (
 
 echo.
 
-REM ── STEP 4: SET PERMISSIONS FOR CHANGED FILES ──────────────
+REM ── STEP 4: SET PERMISSIONS ────────────────────────────────
 echo [STEP 4] Setting file permissions to 644...
 
 ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "chmod 644 %REMOTE_FOLDER%/login.html %REMOTE_FOLDER%/test.html %REMOTE_FOLDER%/api/config.php %REMOTE_FOLDER%/api/auth.php 2>/dev/null" >nul 2>&1
@@ -177,7 +173,7 @@ if %errorlevel% equ 0 (
 ) else (
     echo [ERROR] ✗ Permission change failed
     set DEPLOYMENT_SUCCESS=0
-    set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!Permission change failed. 
+    set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!Permission change failed.
 )
 
 echo.
@@ -185,11 +181,9 @@ echo.
 REM ── STEP 5: CREATE DEPLOY LOG ──────────────────────────────
 echo [STEP 5] Creating deployment log...
 
-REM Remove trailing comma from DEPLOYED_FILES
 for /f "tokens=* delims= " %%A in ("!DEPLOYED_FILES!") do set DEPLOYED_FILES=%%A
 set DEPLOYED_FILES=!DEPLOYED_FILES:~0,-1!
 
-REM Create JSON log file
 (
     echo {
     echo   "lastDeployment": "%mydate% %mytime%",
@@ -232,21 +226,30 @@ if %DEPLOYMENT_SUCCESS% equ 1 (
     echo  ✗ DEPLOYMENT FAILED: %mydate% at %mytime%
     echo ============================================================
     echo.
-    echo ERRORS:
-    echo  %DEPLOYMENT_ERRORS%
+    echo ERRORS: %DEPLOYMENT_ERRORS%
     echo.
     echo GITHUB STATUS: %GIT_STATUS%
     echo CPANEL STATUS: %CPANEL_STATUS%
     echo.
     echo Please check:
-    echo  1. SSH key setup (test: ssh -p 2222 harmakko@harmaalwale.com)
-    echo  2. GitHub credentials (test: git status)
-    echo  3. cPanel connectivity (test: ping harmaalwale.com)
-    echo  4. File permissions (should be 644)
+    echo  1. SSH key setup
+    echo  2. GitHub credentials
+    echo  3. cPanel connectivity
+    echo  4. File permissions
     echo.
 )
 
 echo ============================================================
 echo.
-echo Press any key to close this window...
+echo DEPLOYMENT WINDOW - STAYS OPEN UNTIL YOU CLOSE IT
+echo.
+echo Press any key to continue...
+pause
+
+echo.
+echo Press any key again to close the window...
+pause
+
+echo.
+echo Closing window now...
 pause
