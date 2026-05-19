@@ -1,31 +1,38 @@
 {
-  "lastDeployment": " 1217",
+  "lastDeployment": " 1221",
   "deployDate": "",
-  "deployTime": "1217",
+  "deployTime": "1221",
   "githubStatus": "SUCCESS",
-  "githubTime": "1217",
+  "githubTime": "1221",
   "cpanelStatus": "SUCCESS",
-  "cpanelTime": "1217",
+  "cpanelTime": "1221",
   "filesDeployed": [
     {
       "name": "login.html",
       "status": "deployed",
-      "time": "1217",
+      "time": "1221",
       "location": "/home/harmakko/public_html/login.html"
+    },
+    {
+      "name": "test.html",
+      "status": "deployed",
+      "time": "1221",
+      "location": "/home/harmakko/public_html/test.html"
     },
     {
       "name": "config.php",
       "status": "deployed",
-      "time": "1217",
+      "time": "1221",
       "location": "/home/harmakko/public_html/api/config.php"
     },
     {
       "name": "auth.php",
       "status": "deployed",
-      "time": "1217",
+      "time": "1221",
       "location": "/home/harmakko/public_html/api/auth.php"
     }
   ],
   "liveUrl": "https://harmaalwale.com/login.html",
+  "testUrl": "https://harmaalwale.com/test.html",
   "githubUrl": "https://github.com/harmaalwale/harmaalwale"
 }

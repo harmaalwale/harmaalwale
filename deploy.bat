@@ -1,7 +1,7 @@
 @echo off
 REM ============================================================
-REM  HarmaalWale Deploy.bat — Complete Deployment Automation
-REM  GitHub Push + cPanel Upload + Deployment Tracker
+REM  HarmaalWale Deploy.bat — Smart Deployment
+REM  Only uploads CHANGED files to GitHub + cPanel
 REM ============================================================
 
 setlocal enabledelayedexpansion
@@ -31,6 +31,7 @@ echo [STEP 1] Detecting changed files...
 echo.
 
 git status --short > "%TEMP%\changed_files.txt"
+echo Changed files:
 type "%TEMP%\changed_files.txt"
 
 echo.
@@ -44,7 +45,7 @@ git commit -m "Auto-deploy %mydate% %mytime%"
 git push origin main
 
 if %errorlevel% equ 0 (
-    echo [SUCCESS] ✓ All files pushed to GitHub at %mytime%
+    echo [SUCCESS] ✓ Code pushed to GitHub at %mytime%
     set GIT_STATUS=SUCCESS
     set GIT_TIME=%mytime%
 ) else (
@@ -55,51 +56,92 @@ if %errorlevel% equ 0 (
 
 echo.
 
-REM ── STEP 3: UPLOAD FILES TO CPANEL ─────────────────────────
-echo [STEP 3] Uploading files to cPanel...
+REM ── STEP 3: UPLOAD ONLY CHANGED FILES ──────────────────────
+echo [STEP 3] Uploading CHANGED files to cPanel...
 echo.
 
 set CPANEL_STATUS=SUCCESS
 set CPANEL_TIME=%mytime%
+set DEPLOYED_FILES=
 
-if exist "%LOCAL_FOLDER%\login.html" (
-    echo Uploading login.html...
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\login.html" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/login.html >nul 2>&1
-    echo [SUCCESS] ✓ login.html → Pushed to cPanel
+REM Check and upload login.html if changed
+findstr /M "login.html" "%TEMP%\changed_files.txt" >nul 2>&1
+if %errorlevel% equ 0 (
+    if exist "%LOCAL_FOLDER%\login.html" (
+        echo Uploading login.html (CHANGED)...
+        scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\login.html" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/login.html >nul 2>&1
+        echo [SUCCESS] ✓ login.html → Pushed to cPanel
+        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+      "name": "login.html",^
+      "status": "deployed",^
+      "time": "%mytime%",^
+      "location": "%REMOTE_FOLDER%/login.html"^
+    },
+    )
 ) else (
-    echo [SKIP] login.html not found
+    echo [SKIP] login.html - No changes
 )
 
-if exist "%LOCAL_FOLDER%\test.html" (
-    echo Uploading test.html...
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\test.html" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/test.html >nul 2>&1
-    echo [SUCCESS] ✓ test.html → Pushed to cPanel
+REM Check and upload test.html if changed
+findstr /M "test.html" "%TEMP%\changed_files.txt" >nul 2>&1
+if %errorlevel% equ 0 (
+    if exist "%LOCAL_FOLDER%\test.html" (
+        echo Uploading test.html (CHANGED)...
+        scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\test.html" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/test.html >nul 2>&1
+        echo [SUCCESS] ✓ test.html → Pushed to cPanel
+        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+      "name": "test.html",^
+      "status": "deployed",^
+      "time": "%mytime%",^
+      "location": "%REMOTE_FOLDER%/test.html"^
+    },
+    )
 ) else (
-    echo [SKIP] test.html not found
+    echo [SKIP] test.html - No changes
 )
 
-if exist "%LOCAL_FOLDER%\api\config.php" (
-    echo Uploading config.php...
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\api\config.php" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/config.php >nul 2>&1
-    echo [SUCCESS] ✓ config.php → Pushed to cPanel
+REM Check and upload config.php if changed
+findstr /M "config.php" "%TEMP%\changed_files.txt" >nul 2>&1
+if %errorlevel% equ 0 (
+    if exist "%LOCAL_FOLDER%\api\config.php" (
+        echo Uploading config.php (CHANGED)...
+        scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\api\config.php" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/config.php >nul 2>&1
+        echo [SUCCESS] ✓ config.php → Pushed to cPanel
+        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+      "name": "config.php",^
+      "status": "deployed",^
+      "time": "%mytime%",^
+      "location": "%REMOTE_FOLDER%/api/config.php"^
+    },
+    )
 ) else (
-    echo [SKIP] config.php not found
+    echo [SKIP] config.php - No changes
 )
 
-if exist "%LOCAL_FOLDER%\api\auth.php" (
-    echo Uploading auth.php...
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\api\auth.php" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/auth.php >nul 2>&1
-    echo [SUCCESS] ✓ auth.php → Pushed to cPanel
+REM Check and upload auth.php if changed
+findstr /M "auth.php" "%TEMP%\changed_files.txt" >nul 2>&1
+if %errorlevel% equ 0 (
+    if exist "%LOCAL_FOLDER%\api\auth.php" (
+        echo Uploading auth.php (CHANGED)...
+        scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\api\auth.php" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/auth.php >nul 2>&1
+        echo [SUCCESS] ✓ auth.php → Pushed to cPanel
+        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+      "name": "auth.php",^
+      "status": "deployed",^
+      "time": "%mytime%",^
+      "location": "%REMOTE_FOLDER%/api/auth.php"^
+    },
+    )
 ) else (
-    echo [SKIP] auth.php not found
+    echo [SKIP] auth.php - No changes
 )
 
 echo.
 
-REM ── STEP 4: SET PERMISSIONS ───────────────────────────────
+REM ── STEP 4: SET PERMISSIONS FOR CHANGED FILES ──────────────
 echo [STEP 4] Setting file permissions to 644...
 
-ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "chmod 644 %REMOTE_FOLDER%/login.html %REMOTE_FOLDER%/test.html %REMOTE_FOLDER%/api/config.php %REMOTE_FOLDER%/api/auth.php" >nul 2>&1
+ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "chmod 644 %REMOTE_FOLDER%/login.html %REMOTE_FOLDER%/test.html %REMOTE_FOLDER%/api/config.php %REMOTE_FOLDER%/api/auth.php 2>/dev/null" >nul 2>&1
 
 echo [SUCCESS] ✓ Permissions set to 644
 
@@ -107,6 +149,10 @@ echo.
 
 REM ── STEP 5: CREATE DEPLOY LOG ──────────────────────────────
 echo [STEP 5] Creating deployment log...
+
+REM Remove trailing comma from DEPLOYED_FILES
+for /f "tokens=* delims= " %%A in ("!DEPLOYED_FILES!") do set DEPLOYED_FILES=%%A
+set DEPLOYED_FILES=!DEPLOYED_FILES:~0,-1!
 
 REM Create JSON log file
 (
@@ -119,30 +165,7 @@ REM Create JSON log file
     echo   "cpanelStatus": "%CPANEL_STATUS%",
     echo   "cpanelTime": "%CPANEL_TIME%",
     echo   "filesDeployed": [
-    echo     {
-    echo       "name": "login.html",
-    echo       "status": "deployed",
-    echo       "time": "%mytime%",
-    echo       "location": "%REMOTE_FOLDER%/login.html"
-    echo     },
-    echo     {
-    echo       "name": "test.html",
-    echo       "status": "deployed",
-    echo       "time": "%mytime%",
-    echo       "location": "%REMOTE_FOLDER%/test.html"
-    echo     },
-    echo     {
-    echo       "name": "config.php",
-    echo       "status": "deployed",
-    echo       "time": "%mytime%",
-    echo       "location": "%REMOTE_FOLDER%/api/config.php"
-    echo     },
-    echo     {
-    echo       "name": "auth.php",
-    echo       "status": "deployed",
-    echo       "time": "%mytime%",
-    echo       "location": "%REMOTE_FOLDER%/api/auth.php"
-    echo     }
+    echo     !DEPLOYED_FILES!
     echo   ],
     echo   "liveUrl": "https://harmaalwale.com/login.html",
     echo   "testUrl": "https://harmaalwale.com/test.html",
@@ -161,12 +184,6 @@ echo ============================================================
 echo.
 echo GITHUB STATUS: %GIT_STATUS%
 echo CPANEL STATUS: %CPANEL_STATUS%
-echo.
-echo Files deployed:
-echo  - login.html
-echo  - test.html
-echo  - config.php
-echo  - auth.php
 echo.
 echo View deployment tracker:
 echo  https://harmaalwale.com/test.html
