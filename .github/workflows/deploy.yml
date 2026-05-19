@@ -1,0 +1,36 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Deploy to cPanel via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.CPANEL_HOST }}
+        port: ${{ secrets.CPANEL_PORT }}
+        username: ${{ secrets.CPANEL_USER }}
+        key: ${{ secrets.CPANEL_SSH_KEY }}
+        script: |
+          cd /home/harmakko/public_html
+          git fetch origin main
+          git reset --hard origin/main
+          find . -type d -exec chmod 755 {} \;
+          find . -type f -exec chmod 644 {} \;
+          echo "Deployment completed at $(date)"
+
+    - name: Deployment Status
+      if: success()
+      run: |
+        echo "✅ Deployment successful to cPanel"
+        echo "Changes pushed to GitHub and synced to cPanel"
