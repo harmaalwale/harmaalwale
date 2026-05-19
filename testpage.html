@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deploy Test — HarmaalWale</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .card { text-align: center; padding: 48px 40px; border: 1px solid #222; border-radius: 16px; max-width: 480px; width: 90%; }
+    .logo { font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 32px; }
+    .logo span { color: #E87000; }
+    .badge { display: inline-block; background: #1a3a1a; color: #4caf50; border: 1px solid #4caf50; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-bottom: 24px; }
+    h1 { font-size: 22px; margin-bottom: 12px; color: #fff; }
+    p { color: #888; font-size: 14px; line-height: 1.7; margin-bottom: 8px; }
+    .info { margin-top: 28px; background: #1a1a1a; border-radius: 10px; padding: 20px; text-align: left; }
+    .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 13px; }
+    .row:last-child { border-bottom: none; }
+    .row .label { color: #666; }
+    .row .val { color: #E87000; font-weight: 600; }
+    .home { display: inline-block; margin-top: 28px; background: #E87000; color: #fff; text-decoration: none; padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: 14px; }
+    .home:hover { background: #cc6000; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Harmaal<span>Wale</span></div>
+    <div class="badge">✅ Deploy Successful</div>
+    <h1>Test Page</h1>
+    <p>If you can see this page, the deployment pipeline is working correctly.</p>
+    <p>Both GitHub and cPanel received the latest code.</p>
+
+    <div class="info">
+      <div class="row">
+        <span class="label">Page</span>
+        <span class="val">testpage.html</span>
+      </div>
+      <div class="row">
+        <span class="label">Server</span>
+        <span class="val" id="host">harmaalwale.com</span>
+      </div>
+      <div class="row">
+        <span class="label">Loaded at</span>
+        <span class="val" id="time">—</span>
+      </div>
+      <div class="row">
+        <span class="label">Status</span>
+        <span class="val">🟢 Live</span>
+      </div>
+    </div>
+
+    <a href="/" class="home">← Back to Home</a>
+  </div>
+
+  <script>
+    document.getElementById('time').textContent = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+    document.getElementById('host').textContent = window.location.hostname;
+  </script>
+</body>
+</html>
