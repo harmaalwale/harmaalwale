@@ -1,7 +1,7 @@
 @echo off
 REM ============================================================
 REM  HarmaalWale Deploy.bat — Smart Deployment
-REM  Only uploads CHANGED files to GitHub + cPanel
+REM  Auto-close on SUCCESS | Stay open on FAILURE
 REM ============================================================
 
 setlocal enabledelayedexpansion
@@ -17,6 +17,9 @@ set CPANEL_PORT=2222
 set REMOTE_FOLDER=/home/harmakko/public_html
 set SSH_KEY=%USERPROFILE%\.ssh\id_rsa
 set LOG_FILE=%LOCAL_FOLDER%\deploy-log.json
+
+set DEPLOYMENT_SUCCESS=1
+set DEPLOYMENT_ERRORS=
 
 cd /d "%LOCAL_FOLDER%"
 
@@ -52,6 +55,8 @@ if %errorlevel% equ 0 (
     echo [ERROR] ✗ Git push failed
     set GIT_STATUS=FAILED
     set GIT_TIME=%mytime%
+    set DEPLOYMENT_SUCCESS=0
+    set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!Git push failed. Check GitHub credentials.
 )
 
 echo.
@@ -70,13 +75,19 @@ if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\login.html" (
         echo Uploading login.html (CHANGED)...
         scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\login.html" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/login.html >nul 2>&1
-        echo [SUCCESS] ✓ login.html → Pushed to cPanel
-        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+        if %errorlevel% equ 0 (
+            echo [SUCCESS] ✓ login.html → Pushed to cPanel
+            set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
       "name": "login.html",^
       "status": "deployed",^
       "time": "%mytime%",^
       "location": "%REMOTE_FOLDER%/login.html"^
     },
+        ) else (
+            echo [ERROR] ✗ login.html upload FAILED
+            set DEPLOYMENT_SUCCESS=0
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!login.html upload failed. 
+        )
     )
 ) else (
     echo [SKIP] login.html - No changes
@@ -88,13 +99,19 @@ if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\test.html" (
         echo Uploading test.html (CHANGED)...
         scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\test.html" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/test.html >nul 2>&1
-        echo [SUCCESS] ✓ test.html → Pushed to cPanel
-        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+        if %errorlevel% equ 0 (
+            echo [SUCCESS] ✓ test.html → Pushed to cPanel
+            set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
       "name": "test.html",^
       "status": "deployed",^
       "time": "%mytime%",^
       "location": "%REMOTE_FOLDER%/test.html"^
     },
+        ) else (
+            echo [ERROR] ✗ test.html upload FAILED
+            set DEPLOYMENT_SUCCESS=0
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!test.html upload failed. 
+        )
     )
 ) else (
     echo [SKIP] test.html - No changes
@@ -106,13 +123,19 @@ if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\api\config.php" (
         echo Uploading config.php (CHANGED)...
         scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\api\config.php" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/config.php >nul 2>&1
-        echo [SUCCESS] ✓ config.php → Pushed to cPanel
-        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+        if %errorlevel% equ 0 (
+            echo [SUCCESS] ✓ config.php → Pushed to cPanel
+            set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
       "name": "config.php",^
       "status": "deployed",^
       "time": "%mytime%",^
       "location": "%REMOTE_FOLDER%/api/config.php"^
     },
+        ) else (
+            echo [ERROR] ✗ config.php upload FAILED
+            set DEPLOYMENT_SUCCESS=0
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!config.php upload failed. 
+        )
     )
 ) else (
     echo [SKIP] config.php - No changes
@@ -124,13 +147,19 @@ if %errorlevel% equ 0 (
     if exist "%LOCAL_FOLDER%\api\auth.php" (
         echo Uploading auth.php (CHANGED)...
         scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%LOCAL_FOLDER%\api\auth.php" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/auth.php >nul 2>&1
-        echo [SUCCESS] ✓ auth.php → Pushed to cPanel
-        set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
+        if %errorlevel% equ 0 (
+            echo [SUCCESS] ✓ auth.php → Pushed to cPanel
+            set DEPLOYED_FILES=!DEPLOYED_FILES!    {^
       "name": "auth.php",^
       "status": "deployed",^
       "time": "%mytime%",^
       "location": "%REMOTE_FOLDER%/api/auth.php"^
     },
+        ) else (
+            echo [ERROR] ✗ auth.php upload FAILED
+            set DEPLOYMENT_SUCCESS=0
+            set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!auth.php upload failed. 
+        )
     )
 ) else (
     echo [SKIP] auth.php - No changes
@@ -143,7 +172,13 @@ echo [STEP 4] Setting file permissions to 644...
 
 ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "chmod 644 %REMOTE_FOLDER%/login.html %REMOTE_FOLDER%/test.html %REMOTE_FOLDER%/api/config.php %REMOTE_FOLDER%/api/auth.php 2>/dev/null" >nul 2>&1
 
-echo [SUCCESS] ✓ Permissions set to 644
+if %errorlevel% equ 0 (
+    echo [SUCCESS] ✓ Permissions set to 644
+) else (
+    echo [ERROR] ✗ Permission change failed
+    set DEPLOYMENT_SUCCESS=0
+    set DEPLOYMENT_ERRORS=!DEPLOYMENT_ERRORS!Permission change failed. 
+)
 
 echo.
 
@@ -178,19 +213,37 @@ echo [SUCCESS] ✓ Log created: %LOG_FILE%
 echo.
 
 REM ── COMPLETION ─────────────────────────────────────────────
-echo ============================================================
-echo  DEPLOYMENT COMPLETE: %mydate% at %mytime%
-echo ============================================================
-echo.
-echo GITHUB STATUS: %GIT_STATUS%
-echo CPANEL STATUS: %CPANEL_STATUS%
-echo.
-echo View deployment tracker:
-echo  https://harmaalwale.com/test.html
-echo.
-echo GitHub Repository:
-echo  https://github.com/harmaalwale/harmaalwale
-echo.
-echo ============================================================
-echo.
-pause
+if %DEPLOYMENT_SUCCESS% equ 1 (
+    echo ============================================================
+    echo  ✓ DEPLOYMENT SUCCESSFUL: %mydate% at %mytime%
+    echo ============================================================
+    echo.
+    echo GITHUB STATUS: %GIT_STATUS%
+    echo CPANEL STATUS: %CPANEL_STATUS%
+    echo.
+    echo View deployment tracker:
+    echo  https://harmaalwale.com/test.html
+    echo.
+    timeout /t 3 /nobreak
+    exit /b 0
+) else (
+    echo ============================================================
+    echo  ✗ DEPLOYMENT FAILED: %mydate% at %mytime%
+    echo ============================================================
+    echo.
+    echo ERRORS:
+    echo  %DEPLOYMENT_ERRORS%
+    echo.
+    echo GITHUB STATUS: %GIT_STATUS%
+    echo CPANEL STATUS: %CPANEL_STATUS%
+    echo.
+    echo Please check:
+    echo  1. SSH key setup
+    echo  2. GitHub credentials
+    echo  3. cPanel connectivity
+    echo  4. File permissions (should be 644)
+    echo.
+    echo Press any key to close...
+    pause
+    exit /b 1
+)
