@@ -224,7 +224,7 @@ if %DEPLOYMENT_SUCCESS% equ 1 (
     echo View deployment tracker:
     echo  https://harmaalwale.com/test.html
     echo.
-    timeout /t 3 /nobreak
+    timeout /t 30 /nobreak
     exit /b 0
 ) else (
     echo ============================================================
