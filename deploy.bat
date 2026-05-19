@@ -249,4 +249,4 @@ if %DEPLOYMENT_SUCCESS% equ 1 (
 echo ============================================================
 echo.
 echo Press any key to close this window...
-pause >nul
+pause
