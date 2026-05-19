@@ -1,7 +1,4 @@
 @echo off
-REM ============================================================
-REM HarmaalWale Refresh.bat - FORCE REFRESH ALL FILES
-REM ============================================================
 setlocal enabledelayedexpansion
 
 for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c-%%a-%%b)
@@ -16,51 +13,83 @@ set SSH_KEY=%USERPROFILE%\.ssh\id_rsa
 
 cd /d "%LOCAL_FOLDER%"
 
+cls
 echo.
 echo ============================================================
-echo FULL REFRESH: %mydate% %mytime%
+echo HARMAALWALE - COMPLETE REFRESH (ALL FILES + CACHE CLEAR)
+echo Time: %mydate% %mytime%
 echo ============================================================
 echo.
 
-echo [1] Force push ALL files to GitHub...
+echo [STEP 1] Git operations
+echo.
+git pull origin main 2>nul
 git add -A
-git commit -m "Force refresh %mydate% %mytime%" 2>nul
+git commit -m "Refresh %mydate% %mytime%" 2>nul
 git push -f origin main 2>nul
-echo [SUCCESS] GitHub synced
+echo [OK] GitHub synced
 
 echo.
-echo [2] Uploading ALL files to cPanel...
+echo [STEP 2] Uploading ALL files (complete refresh)
+echo.
 
-REM Upload ALL HTML files
-for %%f in (*.html) do (
-    echo - %%f
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %%f %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/%%f 2>nul
+REM Upload all HTML files
+for /r %%f in (*.html) do (
+    echo - %%~nf
+    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/%%~nf 2>nul
 )
 
-REM Upload ALL API files
-for %%f in (api\*.php) do (
-    echo - api\%%~nf
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no api\%%~nf %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/%%~nf 2>nul
+REM Upload all PHP files in api/
+for /r api %%f in (*.php) do (
+    echo - api/%%~nf
+    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/%%~nf 2>nul
 )
 
-echo [SUCCESS] All files uploaded
+REM Upload CSS files
+for /r assets\css %%f in (*.css) do (
+    echo - assets/css/%%~nf
+    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/assets/css/%%~nf 2>nul
+)
+
+REM Upload JS files
+for /r assets\js %%f in (*.js) do (
+    echo - assets/js/%%~nf
+    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/assets/js/%%~nf 2>nul
+)
+
+echo [OK] All files uploaded
 
 echo.
-echo [3] Clearing cache...
-ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "rm -rf %REMOTE_FOLDER%/.cache %REMOTE_FOLDER%/.htaccess.cache 2>/dev/null; cd %REMOTE_FOLDER%; find . -type f -name '*.html' -o -name '*.php' | head -1 | xargs touch 2>/dev/null" 2>nul
-echo [SUCCESS] Cache cleared
+echo [STEP 3] Clearing server cache
+echo.
+ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% ^
+  "rm -rf /home/harmakko/public_html/.cache 2>/dev/null; ^
+   rm -rf /tmp/php* 2>/dev/null; ^
+   find /home/harmakko/public_html -name '*.cache' -delete 2>/dev/null; ^
+   echo 'Cache cleared'"
+
+echo [OK] Cache cleared
 
 echo.
-echo [4] Setting permissions...
-ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% "find %REMOTE_FOLDER% -type d -exec chmod 755 {} \; 2>/dev/null; find %REMOTE_FOLDER% -type f -exec chmod 644 {} \; 2>/dev/null" 2>nul
-echo [SUCCESS] Permissions set
+echo [STEP 4] Setting permissions
+echo.
+ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% ^
+  "find /home/harmakko/public_html -type d -exec chmod 755 {} \; 2>/dev/null; ^
+   find /home/harmakko/public_html -type f -exec chmod 644 {} \; 2>/dev/null; ^
+   echo 'Permissions set'"
+
+echo [OK] Permissions set
 
 echo.
 echo ============================================================
-echo REFRESH COMPLETE
+echo COMPLETE REFRESH DONE
 echo ============================================================
 echo.
-echo Live: https://harmaalwale.com
+echo All files uploaded
+echo Cache cleared
+echo Permissions set
+echo.
+echo Browser: Hard refresh (Ctrl+Shift+Delete) then visit site
 echo.
 
 :ASK
