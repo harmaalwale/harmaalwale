@@ -3,7 +3,7 @@ error_reporting(0);
 ini_set('display_errors', 0);
 require_once __DIR__ . '/config.php';
 
-// ── Database ─────────────────────────────────────────────────
+// ── Database connection ──────────────────────────────────────
 function getDB() {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
     if ($conn->connect_error) {
@@ -29,13 +29,13 @@ function getBody() {
     return json_decode(file_get_contents('php://input'), true) ?? [];
 }
 
-// ── JWT-like tokens ──────────────────────────────────────────
-function createToken($userId, $mobile, $role) {
+// ── JWT tokens ───────────────────────────────────────────────
+function createToken($userId, $identifier, $role) {
     $payload = base64_encode(json_encode([
-        'uid'    => $userId,
-        'mobile' => $mobile,
-        'role'   => $role,
-        'exp'    => time() + (30 * 24 * 3600) // 30 days
+        'uid'  => $userId,
+        'id'   => $identifier,
+        'role' => $role,
+        'exp'  => time() + (30 * 24 * 3600)
     ]));
     $sig = base64_encode(hash_hmac('sha256', $payload, JWT_SECRET, true));
     return $payload . '.' . $sig;
@@ -49,14 +49,14 @@ function verifyToken($token) {
     $expected = base64_encode(hash_hmac('sha256', $payload, JWT_SECRET, true));
     if (!hash_equals($expected, $sig)) return null;
     $data = json_decode(base64_decode($payload), true);
-    if ($data['exp'] < time()) return null;
+    if (!$data || $data['exp'] < time()) return null;
     return $data;
 }
 
 function requireAuth() {
-    $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $h     = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
     $token = str_replace('Bearer ', '', $h);
-    $user = verifyToken($token);
+    $user  = verifyToken($token);
     if (!$user) jsonResponse(['error' => 'Unauthorized'], 401);
     return $user;
 }
@@ -67,14 +67,18 @@ function requireAdmin() {
     return $user;
 }
 
-// ── Email via PHP mail() with SMTP headers ───────────────────
+// ── Email via cPanel mail() ──────────────────────────────────
 function sendEmail($to, $subject, $htmlBody, $replyTo = null) {
     $headers  = "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
     $headers .= "From: " . MAIL_FROM_NAME . " <" . MAIL_FROM . ">\r\n";
     $headers .= "Reply-To: " . ($replyTo ?? MAIL_SUPPORT) . "\r\n";
     $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
-    return @mail($to, $subject, $htmlBody, $headers);
+    // Send async — never blocks response
+    register_shutdown_function(function() use ($to, $subject, $htmlBody, $headers) {
+        @mail($to, $subject, $htmlBody, $headers);
+    });
+    return true;
 }
 
 function emailTemplate($title, $body) {
@@ -97,7 +101,7 @@ function emailTemplate($title, $body) {
     <div class="wrap">
       <div class="head"><div class="logo">Harmaal<span>Wale</span></div></div>
       <div class="body">' . $body . '</div>
-      <div class="foot">© 2026 HarmaalWale, Jaipur, India<br>
+      <div class="foot">© 2026 HarmaalWale, Jaipur, India &nbsp;|&nbsp;
         <a href="' . SITE_URL . '" style="color:#E87000">harmaalwale.com</a>
       </div>
     </div></body></html>';
@@ -106,27 +110,24 @@ function emailTemplate($title, $body) {
 // ── SMS OTP via Fast2SMS ─────────────────────────────────────
 function sendOTP($mobile, $otp) {
     $apiKey = SMS_API_KEY;
-    if ($apiKey === 'YOUR_FAST2SMS_API_KEY_HERE') {
-        // Dev mode: log OTP (remove in production)
+    if ($apiKey === 'YOUR_FAST2SMS_API_KEY') {
         error_log("DEV OTP for $mobile: $otp");
         return true;
     }
-    $url = "https://www.fast2sms.com/dev/bulkV2";
-    $data = [
-        'route'   => 'otp',
-        'variables_values' => $otp,
-        'numbers' => $mobile,
-    ];
-    $ch = curl_init($url);
+    $ch = curl_init("https://www.fast2sms.com/dev/bulkV2");
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode($data),
-        CURLOPT_HTTPHEADER     => [
+        CURLOPT_POSTFIELDS     => json_encode([
+            'route'             => 'otp',
+            'variables_values'  => $otp,
+            'numbers'           => $mobile,
+        ]),
+        CURLOPT_HTTPHEADER => [
             'authorization: ' . $apiKey,
             'Content-Type: application/json',
         ],
-        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_TIMEOUT => 10,
     ]);
     $res  = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

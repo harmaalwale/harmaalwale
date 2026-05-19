@@ -2,10 +2,11 @@
 api/config.php
 *.log
 error_log
-Thumbs.db
-desktop.ini
-.DS_Store
 node_modules/
+.deploy_logs/
 *.zip
 *.7z
-.deploy_logs/
+Thumbs.db
+.DS_Store
+desktop.ini
+*.bak

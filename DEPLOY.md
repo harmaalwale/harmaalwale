@@ -1,98 +1,82 @@
-# HarmaalWale — Deploy Setup
+# HarmaalWale — Deploy Guide
 
-## How It Works
-
+## Flow
 ```
-Your Local Machine
-      │
-      ├──► GitHub  (git push origin main)       ┐
-      │                                          ├── run in parallel
-      └──► cPanel  (rsync over SSH)             ┘
+Your PC
+  ├──► GitHub  (git push)          ┐
+  └──► cPanel  (rsync over SSH)    ┘  run in parallel
 ```
-
-Both run at the same time. One command does everything.
 
 ---
 
-## One-Time Setup
+## One-Time Setup (do this once)
 
-### 1. Generate SSH key pair
-
+### 1. Generate SSH Key
+Open **Git Bash** and run:
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/harmaalwale_deploy -C "harmaalwale-deploy"
+ssh-keygen -t ed25519 -f ~/.ssh/harmaalwale_deploy -C "harmaalwale"
 ```
+Press Enter twice (no passphrase needed).
 
-This creates two files:
-- `~/.ssh/harmaalwale_deploy` → private key (stays on your machine)
-- `~/.ssh/harmaalwale_deploy.pub` → public key (goes to cPanel)
+### 2. Add Key to cPanel
+```bash
+cat ~/.ssh/harmaalwale_deploy.pub
+```
+Copy the output, then:
+- cPanel → **SSH Access** → **Manage SSH Keys** → **Import Key**
+- Paste → **Import** → **Authorize**
 
-### 2. Add public key to cPanel
+### 3. Test SSH
+```bash
+ssh -i ~/.ssh/harmaalwale_deploy -p 22 harmakko@harmaalwale.com
+```
+Should log in. Type `exit` to leave.
 
-1. cPanel → **SSH Access** → **Manage SSH Keys** → **Import Key**
-2. Paste contents of `~/.ssh/harmaalwale_deploy.pub`
-3. Click **Authorize** next to the imported key
-
-### 3. Set up `.env`
-
+### 4. Create .env
 ```bash
 cp .env.example .env
 ```
+`.env` is already prefilled with your details. No changes needed unless SSH key path differs.
 
-Fill in your values:
-
-| Variable | Where to find it |
-|----------|-----------------|
-| `SSH_HOST` | Your domain, e.g. `harmaalwale.com` |
-| `SSH_USER` | cPanel username (top-right in cPanel) |
-| `SSH_PORT` | Usually `22`. Some hosts use `2222` |
-| `SSH_REMOTE_PATH` | `/home/username/public_html` |
-| `SSH_KEY` | Path to private key: `~/.ssh/harmaalwale_deploy` |
-
-### 4. Test SSH connection
-
+### 5. Set Git Remote
 ```bash
-ssh -i ~/.ssh/harmaalwale_deploy -p 22 username@harmaalwale.com
+git remote set-url origin https://github.com/harmaalwale/harmaalwale.git
 ```
 
-Should log into cPanel server. Type `exit` to leave.
+### 6. Run Database Schema
+- cPanel → **phpMyAdmin**
+- Select `harmakko_hw_customer` database
+- Click **SQL** tab
+- Open `schema.sql`, copy all, paste → **Go**
 
-### 5. Initialize git (first time only)
-
-```bash
-git init
-git remote add origin https://github.com/YOURUSERNAME/harmaalwale.git
-git add -A
-git commit -m "initial"
-git push -u origin main
-```
-
-### 6. Make deploy script executable
-
-```bash
-chmod +x deploy.sh
-```
+### 7. Set Email Password
+- Open `api/config.php`
+- Find `YOUR_NOREPLY_EMAIL_PASSWORD`
+- Replace with password of `noreply@harmaalwale.com`
 
 ---
 
-## Deploy
+## Deploy (every time)
 
+**Windows** — double-click `deploy.bat`
+
+**Mac/Linux/Git Bash:**
 ```bash
 ./deploy.sh
 ```
 
-Optional — custom commit message:
-
+With custom message:
 ```bash
-./deploy.sh "fix: updated homepage banner"
+./deploy.sh "fix: updated homepage"
 ```
 
 ---
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
-| `Permission denied (publickey)` | Run step 2 again — key not authorized in cPanel |
-| `rsync: command not found` | `sudo apt install rsync` or `brew install rsync` |
-| `ssh: connect to host port 22: Connection refused` | Try `SSH_PORT=2222` in `.env` |
-| `git push` asks for password | Set up git credential manager or use SSH remote URL |
+| Error | Fix |
+|-------|-----|
+| `Permission denied (publickey)` | Redo Step 2 |
+| `Port 22 refused` | Script auto-tries port 2222 |
+| `main branch not found` | Script auto-renames master→main |
+| `CRLF warnings` | Normal on Windows, safe to ignore |

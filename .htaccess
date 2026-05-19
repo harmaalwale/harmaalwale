@@ -1,13 +1,57 @@
-# HarmaalWale v3 — .htaccess
-# Security Headers
-Header always set X-Content-Type-Options "nosniff"
-Header always set X-Frame-Options "SAMEORIGIN"
-Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;"
-Header always set Referrer-Policy "strict-origin-when-cross-origin"
-# Hide server version
-ServerSignature Off
+# ═══════════════════════════════════════════════════
+#  HarmaalWale — .htaccess
+# ═══════════════════════════════════════════════════
 
-# Performance: cache static assets
-<FilesMatch "\.(jpg|jpeg|png|gif|svg|css|js|woff2?)$">
-  Header set Cache-Control "max-age=2592000, public"
+Options -Indexes
+DirectoryIndex index.html index.php
+
+# ── GZIP COMPRESSION ────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json text/xml application/xml text/plain image/svg+xml
+</IfModule>
+
+# ── BROWSER CACHING ─────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg             "access plus 1 month"
+  ExpiresByType image/png              "access plus 1 month"
+  ExpiresByType image/webp             "access plus 1 month"
+  ExpiresByType image/svg+xml          "access plus 1 month"
+  ExpiresByType text/css               "access plus 1 week"
+  ExpiresByType application/javascript "access plus 1 week"
+  ExpiresByType text/javascript        "access plus 1 week"
+  ExpiresByType text/html              "access plus 1 hour"
+</IfModule>
+
+# ── SECURITY & CACHE HEADERS ────────────────────────
+<IfModule mod_headers.c>
+  <FilesMatch "\.(jpg|jpeg|png|webp|svg|gif)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  Header always set X-Content-Type-Options  "nosniff"
+  Header always set X-Frame-Options         "SAMEORIGIN"
+  Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;"
+  Header always set Referrer-Policy         "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy      "camera=(), microphone=(), geolocation=(self)"
+  ServerSignature Off
+</IfModule>
+
+# ── URL REWRITING ────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^api/(.*)$ api/$1 [L]
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# ── PROTECT SENSITIVE FILES ──────────────────────────
+<FilesMatch "\.(env|sql|log|bak|sh|bat|ps1)$">
+  Order allow,deny
+  Deny from all
 </FilesMatch>
