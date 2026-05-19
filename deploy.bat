@@ -1,7 +1,7 @@
 @echo off
 REM ============================================================
 REM  HarmaalWale Deploy.bat — Smart Deployment
-REM  Auto-close on SUCCESS | Stay open on FAILURE
+REM  Manual close only (no auto-close)
 REM ============================================================
 
 setlocal enabledelayedexpansion
@@ -212,7 +212,7 @@ echo [SUCCESS] ✓ Log created: %LOG_FILE%
 
 echo.
 
-REM ── COMPLETION ─────────────────────────────────────────────
+REM ── FINAL REPORT ───────────────────────────────────────────
 if %DEPLOYMENT_SUCCESS% equ 1 (
     echo ============================================================
     echo  ✓ DEPLOYMENT SUCCESSFUL: %mydate% at %mytime%
@@ -224,8 +224,9 @@ if %DEPLOYMENT_SUCCESS% equ 1 (
     echo View deployment tracker:
     echo  https://harmaalwale.com/test.html
     echo.
-    timeout /t 30 /nobreak
-    exit /b 0
+    echo GitHub Repository:
+    echo  https://github.com/harmaalwale/harmaalwale
+    echo.
 ) else (
     echo ============================================================
     echo  ✗ DEPLOYMENT FAILED: %mydate% at %mytime%
@@ -238,12 +239,14 @@ if %DEPLOYMENT_SUCCESS% equ 1 (
     echo CPANEL STATUS: %CPANEL_STATUS%
     echo.
     echo Please check:
-    echo  1. SSH key setup
-    echo  2. GitHub credentials
-    echo  3. cPanel connectivity
+    echo  1. SSH key setup (test: ssh -p 2222 harmakko@harmaalwale.com)
+    echo  2. GitHub credentials (test: git status)
+    echo  3. cPanel connectivity (test: ping harmaalwale.com)
     echo  4. File permissions (should be 644)
     echo.
-    echo Press any key to close...
-    pause
-    exit /b 1
 )
+
+echo ============================================================
+echo.
+echo Press any key to close this window...
+pause >nul
