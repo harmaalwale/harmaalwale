@@ -23,16 +23,6 @@ export $(grep -v '^#' .env | grep -v '^$' | xargs)
 LOG_DIR=".deploy_logs"
 mkdir -p "$LOG_DIR"
 
-RSYNC_EXCLUDES=(
-  "--exclude=.git" "--exclude=.env" "--exclude=.env.*"
-  "--exclude=deploy.sh" "--exclude=deploy.bat"
-  "--exclude=DEPLOY.md" "--exclude=SETUP.md"
-  "--exclude=nginx.conf" "--exclude=schema.sql"
-  "--exclude=node_modules" "--exclude=.deploy_logs"
-  "--exclude=*.7z" "--exclude=*.zip" "--exclude=*.bak"
-  "--exclude=debug_*.php" "--exclude=reset_*.php"
-)
-
 echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║   HarmaalWale — Deploy                   ║"
@@ -70,19 +60,53 @@ echo ""
 ) &
 GIT_PID=$!
 
-# ── Job 2: cPanel via rsync/SSH ──────────────────────────────
-SSH_OPTS="-p ${SSH_PORT} -i ${SSH_KEY} -o StrictHostKeyChecking=no -o ConnectTimeout=15"
+# ── Job 2: cPanel — SSH into server, git pull from GitHub ────
+# No rsync needed — works on Windows Git Bash out of the box
 
-# Try SSH port 22, fallback to 2222
+REPO_DIR="/home1/harmakko/harmaalwale_repo"
+DEPLOY_DIR="${SSH_REMOTE_PATH}"
+GITHUB_REPO="https://github.com/harmaalwale/harmaalwale.git"
+
+try_deploy() {
+  local PORT=$1
+  ssh -i "${SSH_KEY}" -p "$PORT" \
+    -o StrictHostKeyChecking=no \
+    -o ConnectTimeout=15 \
+    "${SSH_USER}@${SSH_HOST}" bash << REMOTE
+      set -e
+      # Clone repo if first time, otherwise pull latest
+      if [ -d "$REPO_DIR/.git" ]; then
+        cd "$REPO_DIR"
+        git fetch origin
+        git reset --hard origin/main
+      else
+        mkdir -p "$REPO_DIR"
+        git clone "$GITHUB_REPO" "$REPO_DIR"
+      fi
+
+      # Copy files to public_html (exclude sensitive/deploy files)
+      rsync -a --delete \
+        --exclude='.git' \
+        --exclude='deploy.sh' \
+        --exclude='deploy.bat' \
+        --exclude='Deploy HarmaalWale.bat' \
+        --exclude='DEPLOY.md' \
+        --exclude='SETUP.md' \
+        --exclude='nginx.conf' \
+        --exclude='schema.sql' \
+        --exclude='.env*' \
+        --exclude='*.bak' \
+        "$REPO_DIR/" "$DEPLOY_DIR/"
+
+      echo "Deploy complete on server"
+REMOTE
+}
+
 (
-  rsync -az --delete -e "ssh $SSH_OPTS" "${RSYNC_EXCLUDES[@]}" \
-    ./ "${SSH_USER}@${SSH_HOST}:${SSH_REMOTE_PATH}/" > "$LOG_DIR/ssh.log" 2>&1
-
-  if [ $? -ne 0 ] && [ "$SSH_PORT" = "22" ]; then
+  try_deploy 22 > "$LOG_DIR/ssh.log" 2>&1
+  if [ $? -ne 0 ]; then
     echo "Port 22 failed, trying 2222..." >> "$LOG_DIR/ssh.log"
-    SSH_OPTS="-p 2222 -i ${SSH_KEY} -o StrictHostKeyChecking=no -o ConnectTimeout=15"
-    rsync -az --delete -e "ssh $SSH_OPTS" "${RSYNC_EXCLUDES[@]}" \
-      ./ "${SSH_USER}@${SSH_HOST}:${SSH_REMOTE_PATH}/" >> "$LOG_DIR/ssh.log" 2>&1
+    try_deploy 2222 >> "$LOG_DIR/ssh.log" 2>&1
   fi
   echo $? > "$LOG_DIR/ssh.exit"
 ) &
