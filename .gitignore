@@ -1,5 +1,4 @@
 .env
-api/config.php
 *.log
 error_log
 node_modules/
