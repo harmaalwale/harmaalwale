@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Applications – HarmaalWale Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #E87000; --orange-light: #FF8C1A;
+    --black: #0d0d0d; --dark: #141414; --panel: #1a1a1a;
+    --border: #252525; --text: #e0e0e0; --muted: #666;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Barlow',sans-serif; background:var(--black); color:var(--text); min-height:100vh; }
+
+  /* LOGIN */
+  #loginScreen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
+  .login-box { background:var(--dark); border:1px solid var(--border); border-radius:16px; padding:44px 40px; width:100%; max-width:400px; text-align:center; }
+  .login-box img { height:44px; margin-bottom:28px; }
+  .login-box h2 { font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:900; text-transform:uppercase; margin-bottom:6px; }
+  .login-box p { color:var(--muted); font-size:13px; margin-bottom:28px; }
+  .login-field { text-align:left; margin-bottom:16px; }
+  .login-field label { display:block; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .login-field input { width:100%; background:#0d0d0d; border:1.5px solid var(--border); border-radius:8px; padding:11px 14px; color:#fff; font-size:14px; outline:none; font-family:'Barlow',sans-serif; transition:border-color 0.2s; }
+  .login-field input:focus { border-color:var(--orange); }
+  .login-btn { width:100%; background:var(--orange); color:#fff; border:none; padding:13px; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800; letter-spacing:1px; text-transform:uppercase; cursor:pointer; margin-top:8px; transition:background 0.2s; }
+  .login-btn:hover { background:var(--orange-light); }
+  .login-err { color:#e74c3c; font-size:13px; margin-top:10px; min-height:18px; }
+  .login-hint { font-size:11px; color:#333; margin-top:16px; }
+
+  /* MAIN LAYOUT */
+  #mainApp { display:none; }
+  .top-bar { background:var(--dark); border-bottom:1px solid var(--border); padding:0 32px; height:62px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+  .top-bar-left { display:flex; align-items:center; gap:20px; }
+  .top-bar-left img { height:38px; }
+  .top-bar-title { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--orange); }
+  .top-bar-right { display:flex; align-items:center; gap:16px; }
+  .admin-tag { font-size:12px; color:var(--muted); background:#111; border:1px solid var(--border); padding:4px 12px; border-radius:4px; }
+  .logout-btn { background:none; border:1px solid #2a2a2a; color:var(--muted); padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer; font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:1px; text-transform:uppercase; transition:all 0.2s; }
+  .logout-btn:hover { border-color:#e74c3c; color:#e74c3c; }
+
+  /* STATS BAR */
+  .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border-bottom:1px solid var(--border); }
+  .stat-box { background:var(--dark); padding:20px 28px; }
+  .stat-box .num { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:900; color:var(--orange); }
+  .stat-box .lbl { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-top:2px; }
+
+  /* CONTENT */
+  .content { padding:28px 32px; }
+
+  /* FILTERS */
+  .filters-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:24px; }
+  .filter-btn { background:var(--panel); border:1px solid var(--border); color:var(--muted); padding:7px 18px; border-radius:6px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+  .filter-btn.active, .filter-btn:hover { background:rgba(232,112,0,0.12); border-color:var(--orange); color:var(--orange); }
+  .search-box { background:var(--panel); border:1.5px solid var(--border); border-radius:6px; padding:7px 14px; color:#fff; font-family:'Barlow',sans-serif; font-size:13px; outline:none; width:220px; transition:border-color 0.2s; }
+  .search-box:focus { border-color:var(--orange); }
+  .search-box::placeholder { color:#333; }
+  .refresh-btn { background:none; border:1px solid var(--border); color:var(--muted); padding:7px 14px; border-radius:6px; font-size:13px; cursor:pointer; transition:all 0.2s; }
+  .refresh-btn:hover { border-color:var(--orange); color:var(--orange); }
+
+  /* TABLE */
+  .table-wrap { background:var(--dark); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead { background:#111; }
+  thead th { padding:12px 16px; text-align:left; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap; }
+  tbody tr { border-bottom:1px solid #1a1a1a; transition:background 0.15s; }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:hover { background:rgba(232,112,0,0.04); }
+  td { padding:14px 16px; vertical-align:middle; }
+  .td-name { font-weight:600; color:#fff; }
+  .td-brand { color:var(--muted); font-size:12px; margin-top:2px; }
+  .td-email { color:var(--muted); font-size:12px; }
+
+  /* STATUS BADGE */
+  .status { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:4px; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; }
+  .status.pending { background:rgba(255,193,7,0.12); color:#FFC107; border:1px solid rgba(255,193,7,0.25); }
+  .status.approved { background:rgba(76,175,80,0.12); color:#4CAF50; border:1px solid rgba(76,175,80,0.25); }
+  .status.rejected { background:rgba(231,76,60,0.12); color:#e74c3c; border:1px solid rgba(231,76,60,0.25); }
+  .status.review { background:rgba(100,181,246,0.12); color:#64B5F6; border:1px solid rgba(100,181,246,0.25); }
+
+  /* PLAN BADGE */
+  .plan-tag { display:inline-block; padding:3px 8px; border-radius:3px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+  .plan-tag.starter { background:rgba(100,181,246,0.1); color:#64B5F6; }
+  .plan-tag.growth { background:rgba(232,112,0,0.12); color:var(--orange); }
+  .plan-tag.enterprise { background:rgba(156,39,176,0.1); color:#CE93D8; }
+
+  /* ACTION BUTTONS */
+  .action-btns { display:flex; gap:6px; }
+  .act-btn { border:none; padding:6px 12px; border-radius:5px; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; cursor:pointer; transition:all 0.15s; }
+  .act-view { background:#1e1e1e; color:#aaa; border:1px solid #2a2a2a; }
+  .act-view:hover { border-color:var(--orange); color:var(--orange); }
+  .act-approve { background:rgba(76,175,80,0.15); color:#4CAF50; border:1px solid rgba(76,175,80,0.2); }
+  .act-approve:hover { background:#4CAF50; color:#fff; }
+  .act-reject { background:rgba(231,76,60,0.1); color:#e74c3c; border:1px solid rgba(231,76,60,0.15); }
+  .act-reject:hover { background:#e74c3c; color:#fff; }
+
+  /* EMPTY */
+  .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty-state .icon { font-size:48px; margin-bottom:12px; }
+  .empty-state p { font-size:14px; }
+
+  /* LOADING */
+  .loading { text-align:center; padding:40px; color:var(--muted); }
+  .spinner { width:32px; height:32px; border:3px solid #222; border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* DETAIL MODAL */
+  #detailModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; overflow-y:auto; padding:24px; }
+  .modal-box { background:var(--dark); border:1px solid var(--border); border-radius:16px; max-width:720px; margin:0 auto; position:relative; }
+  .modal-header { padding:24px 28px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .modal-header h2 { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; text-transform:uppercase; }
+  .modal-close { background:none; border:1px solid var(--border); color:var(--muted); width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .modal-close:hover { border-color:#e74c3c; color:#e74c3c; }
+  .modal-body { padding:28px; }
+  .detail-section { margin-bottom:24px; }
+  .detail-section h3 { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--orange); padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:14px; }
+  .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .detail-item label { display:block; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#444; margin-bottom:3px; }
+  .detail-item span { font-size:13px; color:#ccc; word-break:break-word; }
+  .detail-item.full { grid-column:1/-1; }
+  .detail-long { background:#111; border:1px solid #1e1e1e; border-radius:6px; padding:10px 12px; font-size:13px; color:#aaa; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+  .modal-footer { padding:20px 28px; border-top:1px solid var(--border); display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap; }
+  .modal-footer .act-btn { padding:10px 20px; font-size:13px; }
+
+  /* TOAST */
+  #toast { position:fixed; bottom:24px; right:24px; background:var(--dark); border:1px solid var(--border); color:#fff; padding:12px 20px; border-radius:8px; font-size:13px; z-index:9999; display:none; box-shadow:0 8px 24px rgba(0,0,0,0.5); }
+  #toast.show { display:block; animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  @media(max-width:768px) {
+    .stats-bar { grid-template-columns:1fr 1fr; }
+    .content { padding:16px; }
+    .top-bar { padding:0 16px; }
+    table { font-size:12px; }
+    .detail-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img src="logo.jpg" alt="HarmaalWale">
+    <h2>Seller <span style="color:var(--orange)">Dashboard</span></h2>
+    <p>Admin access only. Enter your credentials to continue.</p>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="admin" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-hint">Access restricted to HarmaalWale administrators</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <img src="logo.jpg" alt="HarmaalWale">
+      <span class="top-bar-title">Seller Applications</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="admin-tag" id="adminLabel">Admin</span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-box"><div class="num" id="statTotal">—</div><div class="lbl">Total Applications</div></div>
+    <div class="stat-box"><div class="num" id="statPending" style="color:#FFC107">—</div><div class="lbl">Pending Review</div></div>
+    <div class="stat-box"><div class="num" id="statApproved" style="color:#4CAF50">—</div><div class="lbl">Approved</div></div>
+    <div class="stat-box"><div class="num" id="statRejected" style="color:#e74c3c">—</div><div class="lbl">Rejected</div></div>
+  </div>
+
+  <div class="content">
+    <div class="filters-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('pending',this)">🕐 Pending</button>
+      <button class="filter-btn" onclick="setFilter('review',this)">🔍 In Review</button>
+      <button class="filter-btn" onclick="setFilter('approved',this)">✅ Approved</button>
+      <button class="filter-btn" onclick="setFilter('rejected',this)">✕ Rejected</button>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search by name, email, brand..." oninput="renderTable()">
+      <button class="refresh-btn" onclick="loadApplications()">↻ Refresh</button>
+    </div>
+
+    <div class="table-wrap">
+      <div id="tableBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div id="detailModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="modalTitle">Application Detail</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'harmaalwale@2025';
+const API = 'api/seller.php';
+
+let allApps = [];
+let currentFilter = 'all';
+let currentApp = null;
+
+// ─── LOGIN ─────────────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    sessionStorage.setItem('hw_seller_admin', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('adminLabel').textContent = u;
+    loadApplications();
+  } else {
+    err.textContent = '⚠️ Invalid username or password';
+    document.getElementById('loginPass').value = '';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('hw_seller_admin');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').textContent = '';
+}
+
+// Check if already logged in
+if (sessionStorage.getItem('hw_seller_admin')) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  loadApplications();
+}
+
+// ─── LOAD DATA ─────────────────────────────────────────────────
+function loadApplications() {
+  const tb = document.getElementById('tableBody');
+  tb.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading applications...</p></div>';
+
+  fetch(API + '?action=list', {
+    headers: { 'X-Admin': '1' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      allApps = data.applications || [];
+      updateStats();
+      renderTable();
+    } else {
+      tb.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>Failed to load: ' + (data.error || 'Unknown error') + '</p></div>';
+    }
+  })
+  .catch(() => {
+    // Demo mode if API not available
+    allApps = getDemoData();
+    updateStats();
+    renderTable();
+    showToast('ℹ️ Running in demo mode (API not connected)');
+  });
+}
+
+// ─── STATS ─────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('statTotal').textContent = allApps.length;
+  document.getElementById('statPending').textContent = allApps.filter(a => a.status === 'pending').length;
+  document.getElementById('statApproved').textContent = allApps.filter(a => a.status === 'approved').length;
+  document.getElementById('statRejected').textContent = allApps.filter(a => a.status === 'rejected').length;
+}
+
+// ─── FILTER & RENDER ───────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const q = (document.getElementById('searchBox').value || '').toLowerCase();
+  let apps = allApps.filter(a => {
+    if (currentFilter !== 'all' && a.status !== currentFilter) return false;
+    if (q && !`${a.name} ${a.email} ${a.brand} ${a.category}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const tb = document.getElementById('tableBody');
+  if (!apps.length) {
+    tb.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No applications found</p></div>';
+    return;
+  }
+
+  tb.innerHTML = `<table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Applicant</th>
+        <th>Category</th>
+        <th>Plan</th>
+        <th>Owner?</th>
+        <th>Status</th>
+        <th>Submitted</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${apps.map((a, i) => `
+        <tr>
+          <td style="color:var(--muted);font-size:12px">${a.id || i+1}</td>
+          <td>
+            <div class="td-name">${esc(a.name)}</div>
+            <div class="td-brand">${esc(a.brand)}</div>
+            <div class="td-email">${esc(a.email)}</div>
+          </td>
+          <td style="font-size:12px;color:#aaa">${esc(a.category || '—')}</td>
+          <td><span class="plan-tag ${a.plan}">${a.plan || '—'}</span></td>
+          <td style="font-size:12px;color:${a.is_owner==='yes'?'#4CAF50':'#aaa'}">${a.is_owner==='yes'?'✓ Yes':'Representative'}</td>
+          <td><span class="status ${a.status}">${statusIcon(a.status)} ${a.status}</span></td>
+          <td style="font-size:11px;color:var(--muted);white-space:nowrap">${formatDate(a.submitted_at)}</td>
+          <td>
+            <div class="action-btns">
+              <button class="act-btn act-view" onclick="viewApp(${JSON.stringify(a).replace(/"/g,'&quot;')})">View</button>
+              ${a.status==='pending'||a.status==='review' ? `
+                <button class="act-btn act-approve" onclick="updateStatus('${a.id||i}','approved')">✓</button>
+                <button class="act-btn act-reject" onclick="updateStatus('${a.id||i}','rejected')">✕</button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ─── DETAIL MODAL ──────────────────────────────────────────────
+function viewApp(app) {
+  currentApp = app;
+  document.getElementById('modalTitle').textContent = app.name + ' — ' + (app.brand || '');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-section">
+      <h3>Personal & Business</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Full Name</label><span>${esc(app.name)}</span></div>
+        <div class="detail-item"><label>Brand / Business</label><span>${esc(app.brand)}</span></div>
+        <div class="detail-item"><label>Email</label><span>${esc(app.email)}</span></div>
+        <div class="detail-item"><label>Phone</label><span>${esc(app.phone)}</span></div>
+        <div class="detail-item"><label>Location</label><span>${esc(app.city)}, ${esc(app.state)}</span></div>
+        <div class="detail-item"><label>Business Type</label><span>${esc(app.biz_type)}</span></div>
+        <div class="detail-item"><label>Is Owner?</label><span style="color:${app.is_owner==='yes'?'#4CAF50':'#aaa'}">${app.is_owner==='yes'?'✓ Yes, owner':'Representative'}</span></div>
+        <div class="detail-item"><label>Years in Business</label><span>${esc(app.years)}</span></div>
+        <div class="detail-item"><label>GST Number</label><span>${esc(app.gst||'—')}</span></div>
+        <div class="detail-item"><label>PAN Number</label><span>${esc(app.pan||'—')}</span></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Products & Plan</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Category</label><span>${esc(app.category)}</span></div>
+        <div class="detail-item"><label>Plan Applied For</label><span class="plan-tag ${app.plan}">${app.plan}</span></div>
+        <div class="detail-item"><label>Price Range</label><span>${esc(app.price_range||'—')}</span></div>
+        <div class="detail-item full"><label>Products to Sell</label><div class="detail-long">${esc(app.products)}</div></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Sourcing & Authorization</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Authorization Status</label><span>${esc(app.authorized||'—')}</span></div>
+        <div class="detail-item"><label>Has Documents?</label><span>${esc(app.docs||'—')}</span></div>
+        <div class="detail-item full"><label>Sourcing Details</label><div class="detail-long">${esc(app.sourcing)}</div></div>
+        <div class="detail-item full"><label>Other Platforms</label><div class="detail-long">${esc(app.other_platforms||'—')}</div></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Logistics</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Shipping Handler</label><span>${esc(app.shipping||'—')}</span></div>
+        <div class="detail-item"><label>Dispatch Time</label><span>${esc(app.dispatch||'—')}</span></div>
+        <div class="detail-item"><label>Monthly Capacity</label><span>${esc(app.capacity||'—')}</span></div>
+      </div>
+    </div>
+    ${app.why || app.questions ? `
+    <div class="detail-section">
+      <h3>Additional Information</h3>
+      <div class="detail-grid">
+        ${app.why ? `<div class="detail-item full"><label>Why HarmaalWale?</label><div class="detail-long">${esc(app.why)}</div></div>` : ''}
+        ${app.questions ? `<div class="detail-item full"><label>Questions / Notes</label><div class="detail-long">${esc(app.questions)}</div></div>` : ''}
+      </div>
+    </div>` : ''}
+    <div class="detail-section">
+      <h3>Application Status</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Current Status</label><span class="status ${app.status}">${statusIcon(app.status)} ${app.status}</span></div>
+        <div class="detail-item"><label>Submitted</label><span>${formatDate(app.submitted_at)}</span></div>
+        <div class="detail-item"><label>Reference</label><span style="color:var(--orange)">${esc(app.ref || app.id || '—')}</span></div>
+      </div>
+    </div>
+  `;
+
+  const footer = document.getElementById('modalFooter');
+  footer.innerHTML = `<button class="act-btn act-view" onclick="closeModal()">Close</button>`;
+  if (app.status === 'pending' || app.status === 'review') {
+    footer.innerHTML += `
+      <button class="act-btn" style="background:rgba(100,181,246,0.15);color:#64B5F6;border:1px solid rgba(100,181,246,0.2)" onclick="updateStatus('${app.id||app.email}','review');closeModal()">Mark In Review</button>
+      <button class="act-btn act-approve" onclick="updateStatus('${app.id||app.email}','approved');closeModal()">✓ Approve</button>
+      <button class="act-btn act-reject" onclick="updateStatus('${app.id||app.email}','rejected');closeModal()">✕ Reject</button>
+    `;
+  }
+
+  document.getElementById('detailModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('detailModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ─── UPDATE STATUS ─────────────────────────────────────────────
+function updateStatus(id, newStatus) {
+  const labels = { approved: '✅ Approved', rejected: '✕ Rejected', review: '🔍 Marked In Review' };
+
+  fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin': '1' },
+    body: JSON.stringify({ action: 'update_status', id, status: newStatus })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.success) {
+      // Update local data
+      const app = allApps.find(a => String(a.id) === String(id) || a.email === id);
+      if (app) app.status = newStatus;
+      updateStats();
+      renderTable();
+      showToast(labels[newStatus] || 'Status updated');
+    } else {
+      // Demo mode update
+      const app = allApps.find(a => String(a.id) === String(id) || a.email === id);
+      if (app) { app.status = newStatus; updateStats(); renderTable(); }
+      showToast(labels[newStatus] + ' (demo mode)');
+    }
+  })
+  .catch(() => {
+    // Demo mode
+    const app = allApps.find(a => String(a.id) === String(id) || a.email === id);
+    if (app) { app.status = newStatus; updateStats(); renderTable(); }
+    showToast(labels[newStatus] + ' (demo mode)');
+  });
+}
+
+// ─── HELPERS ───────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function statusIcon(s) {
+  return { pending: '🕐', approved: '✅', rejected: '✕', review: '🔍' }[s] || '—';
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); }
+  catch { return d; }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Keyboard close
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ─── DEMO DATA ─────────────────────────────────────────────────
+function getDemoData() {
+  return [
+    { id:'1', name:'Rajesh Kumar', brand:'Kumar Textiles', email:'rajesh@kumartextiles.com', phone:'+91 98765 43210', city:'Surat', state:'Gujarat', is_owner:'yes', biz_type:'Sole Proprietor / Individual', gst:'24AAAPK1234A1ZD', pan:'AAAPK1234A', years:'3–5 years', category:'Fashion & Apparel', plan:'starter', products:'Men\'s cotton kurtas, Women\'s sarees, Kids ethnic wear', price_range:'₹299 – ₹1,999', sourcing:'We manufacture our own products at our unit in Surat textile park. All fabrics sourced directly from mills.', authorized:'yes_own', docs:'Yes, I can provide documents if requested', other_platforms:'Meesho, occasional Instagram sales', shipping:'I use third-party logistics (Shiprocket, Delhivery, etc.)', dispatch:'1–2 business days', capacity:'100–200 orders/month', why:'Want to expand beyond Meesho. HarmaalWale has a focused audience.', questions:'', submitted_at:'2025-09-01T10:23:00Z', status:'pending', ref:'HW-A1B2C' },
+    { id:'2', name:'Priya Sharma', brand:'TechSource India', email:'priya@techsource.in', phone:'+91 87654 32109', city:'Jaipur', state:'Rajasthan', is_owner:'no', biz_type:'Private Limited Company', gst:'08AAACS1234B1ZE', pan:'AAACS1234B', years:'5–10 years', category:'IT Products & Electronics', plan:'growth', products:'Laptop accessories, USB hubs, mechanical keyboards, webcams, monitors', price_range:'₹499 – ₹15,000', sourcing:'Authorized distributor for Logitech and HP accessories in Rajasthan. Direct import for generic accessories.', authorized:'yes_brand', docs:'Yes, I can provide documents if requested', other_platforms:'Amazon, Flipkart', shipping:'I use my own courier / logistics', dispatch:'Same day', capacity:'500+ orders/month', why:'Looking to diversify marketplace presence. Our Logitech authorization is verified.', questions:'Can we get a featured placement for new product launches?', submitted_at:'2025-09-02T14:45:00Z', status:'review', ref:'HW-D3E4F' },
+    { id:'3', name:'Mohan Verma', brand:'PrintCare Solutions', email:'mohan@printcare.co', phone:'+91 76543 21098', city:'Delhi', state:'Delhi', is_owner:'yes', biz_type:'Partnership Firm', gst:'07AAAPV1234C1ZF', pan:'AAAPV1234C', years:'More than 10 years', category:'MFD & Printer Spares', plan:'starter', products:'Canon, HP, Epson ink cartridges, toner cartridges, printer drums, rollers', price_range:'₹199 – ₹4,999', sourcing:'Authorized service partner for Canon India. Also stock genuine HP toners from authorized distributors.', authorized:'yes_brand', docs:'Yes, I can provide documents if requested', other_platforms:'Own website printcare.co, some B2B direct sales', shipping:'I use my own courier / logistics', dispatch:'Same day', capacity:'300–400 orders/month', why:'Our customers often search for printer spares online. Want a curated platform presence.', questions:'Do you allow B2B bulk orders through the platform?', submitted_at:'2025-09-03T09:10:00Z', status:'approved', ref:'HW-G5H6I' },
+    { id:'4', name:'Anita Patel', brand:'Nourish Daily', email:'anita@nourishdaily.com', phone:'+91 65432 10987', city:'Ahmedabad', state:'Gujarat', is_owner:'yes', biz_type:'Sole Proprietor / Individual', gst:'', pan:'AAAPA1234D', years:'1–2 years', category:'Daily Essentials', plan:'starter', products:'Organic dry fruits, natural soaps, herbal hair oil, artisanal spices', price_range:'₹149 – ₹899', sourcing:'I source directly from farmers in Gujarat and Rajasthan. All natural, no middlemen.', authorized:'yes_own', docs:'Not applicable', other_platforms:'Instagram shop only', shipping:'I use third-party logistics (Shiprocket, Delhivery, etc.)', dispatch:'3–5 business days', capacity:'50–100 orders/month', why:'Instagram reach is limited. Want a proper storefront.', questions:'', submitted_at:'2025-09-04T16:30:00Z', status:'rejected', ref:'HW-J7K8L' },
+  ];
+}
+</script>
+</body>
+</html>

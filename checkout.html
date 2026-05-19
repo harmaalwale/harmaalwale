@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Checkout – HarmaalWale</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+    <link rel="canonical" href="https://harmaalwale.com/checkout.html">
+    <meta name="description" content="Checkout securely on HarmaalWale. Fast pan India delivery with safe and encrypted payments.">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hw.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    .checkout-grid{display:grid;grid-template-columns:1fr 380px;gap:28px;max-width:1000px;margin:0 auto;padding:32px 24px;}
+    .section-head{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--text);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+    .addr-option{background:var(--bg-2);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+    .addr-option.selected{border-color:var(--accent);background:var(--bg-3);}
+    .payment-option{display:flex;align-items:center;gap:14px;background:var(--bg-2);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+    .payment-option.selected{border-color:var(--accent);}
+    .payment-logo{width:52px;height:28px;object-fit:contain;}
+    .pay-name{font-weight:700;font-size:14px;color:var(--text);}
+    .pay-sub{font-size:11px;color:var(--text-3);}
+    .order-summary{background:var(--bg-2);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:88px;}
+    .summary-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-2);margin-bottom:10px;}
+    .summary-total{display:flex;justify-content:space-between;font-weight:900;font-size:18px;font-family:'Barlow Condensed',sans-serif;color:var(--text);border-top:1px solid var(--border);padding-top:14px;margin-top:8px;}
+    @media(max-width:768px){.checkout-grid{grid-template-columns:1fr;}.order-summary{position:static;}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-back" href="mfd-spares.html">← Continue Shopping</a>
+  <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label" id="themeLabel">Light</span>
+    </div>
+  </div>
+</nav>
+
+<div class="checkout-grid">
+  <div>
+    <div id="mainAlert"></div>
+
+    <!-- Address -->
+    <div class="section-head">📍 Delivery Address</div>
+    <div id="addressSection">
+      <div class="empty-state" style="padding:20px"><div class="spinner" style="margin:0 auto 8px"></div><p style="font-size:13px;color:var(--text-3)">Loading addresses...</p></div>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="window.location.href='account.html?tab=addresses'">+ Add New Address</button>
+
+    <!-- Payment -->
+    <div class="section-head" style="margin-top:28px">💳 Payment Method</div>
+    <div id="selectedAddress" style="display:none">
+      <div class="payment-option selected" id="pay-razorpay" onclick="selectPayment('razorpay')">
+        <div style="width:52px;height:28px;background:#072654;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff">RAZORPAY</div>
+        <div><div class="pay-name">Razorpay</div><div class="pay-sub">UPI, Cards, Net Banking, Wallets</div></div>
+      </div>
+      <div class="payment-option" id="pay-payu" onclick="selectPayment('payu')">
+        <div style="width:52px;height:28px;background:#f07c00;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff">PAYU</div>
+        <div><div class="pay-name">PayU</div><div class="pay-sub">All major payment methods</div></div>
+      </div>
+      <div class="payment-option" id="pay-cod" onclick="selectPayment('cod')">
+        <div style="font-size:24px">💵</div>
+        <div><div class="pay-name">Cash on Delivery</div><div class="pay-sub">Pay when your order arrives</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="order-summary">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;margin-bottom:16px;color:var(--text)">Order Summary</div>
+    <div id="cartItems" style="margin-bottom:16px;display:flex;flex-direction:column;gap:10px"></div>
+    <div class="summary-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+    <div class="summary-row"><span>Shipping</span><span style="color:var(--success)">FREE</span></div>
+    <div class="summary-total"><span>Total</span><span id="totalAmount">₹0</span></div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" id="placeOrderBtn" onclick="placeOrder()">Place Order →</button>
+    <p style="font-size:11px;color:var(--text-3);text-align:center;margin-top:10px">🔒 Secure & encrypted checkout</p>
+  </div>
+</div>
+
+<script>
+  const html=document.documentElement,lbl=document.getElementById('themeLabel');
+  const saved=localStorage.getItem('hw-theme')||'light';
+  setTheme(saved);
+  function setTheme(t){html.setAttribute('data-theme',t);lbl.textContent=t==='dark'?'Dark':'Light';localStorage.setItem('hw-theme',t);}
+  function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
+
+  const token=localStorage.getItem('hw_token');
+  const user=JSON.parse(localStorage.getItem('hw_user')||'{}');
+  if(!token) window.location.href='login.html?redirect=checkout.html';
+  const headers={'Content-Type':'application/json','Authorization':'Bearer '+token};
+
+  let selectedAddress=null, selectedPayment='razorpay';
+
+  // Load cart from localStorage
+  const cart=JSON.parse(localStorage.getItem('hw_cart')||'[]');
+  const total=cart.reduce((s,i)=>s+(i.price*i.quantity),0);
+
+  // Render cart
+  document.getElementById('cartItems').innerHTML = cart.length
+    ? cart.map(i=>`<div style="display:flex;gap:10px;align-items:center"><div style="flex:1;font-size:13px;color:var(--text)">${i.name} <span style="color:var(--text-3)">×${i.quantity}</span></div><div style="font-size:13px;font-weight:700">₹${(i.price*i.quantity).toLocaleString('en-IN')}</div></div>`).join('')
+    : '<div style="font-size:13px;color:var(--text-3);text-align:center">Cart is empty. <a href="mfd-spares.html" style="color:var(--accent)">Shop now</a></div>';
+  document.getElementById('subtotal').textContent='₹'+total.toLocaleString('en-IN');
+  document.getElementById('totalAmount').textContent='₹'+total.toLocaleString('en-IN');
+
+  // Load addresses
+  async function loadAddresses(){
+    const res=await fetch('api/users.php?action=addresses',{headers});
+    const data=await res.json();
+    const el=document.getElementById('addressSection');
+    if(!data.addresses?.length){
+      el.innerHTML=`<div class="alert alert-info">No addresses saved. <a href="account.html?tab=addresses" style="color:var(--accent);font-weight:700">Add one first →</a></div>`;
+      return;
+    }
+    el.innerHTML=data.addresses.map(a=>`
+      <div class="addr-option ${a.is_default?'selected':''}" onclick="selectAddr(${a.id},this)" data-id="${a.id}">
+        <div style="font-weight:700;font-size:14px;color:var(--text)">${a.label} — ${a.name} ${a.is_default?'<span class="tag tag-green" style="font-size:9px">Default</span>':''}</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:3px">${a.line1}, ${a.city}, ${a.state} - ${a.pincode} | 📞 ${a.mobile}</div>
+      </div>`).join('');
+    const def=data.addresses.find(a=>a.is_default)||data.addresses[0];
+    selectedAddress=def.id;
+    document.getElementById('selectedAddress').style.display='block';
+  }
+
+  function selectAddr(id,el){
+    document.querySelectorAll('.addr-option').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedAddress=id;
+  }
+
+  function selectPayment(type){
+    document.querySelectorAll('.payment-option').forEach(e=>e.classList.remove('selected'));
+    document.getElementById('pay-'+type).classList.add('selected');
+    selectedPayment=type;
+  }
+
+  async function placeOrder(){
+    if(!selectedAddress){showAlert('Please select a delivery address','error');return;}
+    if(!cart.length){showAlert('Your cart is empty','error');return;}
+    const btn=document.getElementById('placeOrderBtn');
+    btn.disabled=true;btn.textContent='Processing...';
+
+    if(selectedPayment==='razorpay'){
+      await razorpayCheckout(btn);
+    } else if(selectedPayment==='payu'){
+      await payuCheckout(btn);
+    } else {
+      await codOrder(btn);
+    }
+  }
+
+  async function razorpayCheckout(btn){
+    try{
+      const res=await fetch('api/payment.php?action=create_order',{method:'POST',headers,body:JSON.stringify({amount:total})});
+      const data=await res.json();
+      if(!data.success){showAlert(data.error,'error');btn.disabled=false;btn.textContent='Place Order →';return;}
+      const options={
+        key:data.key,amount:data.amount,currency:'INR',
+        name:'HarmaalWale',description:'Order Payment',
+        order_id:data.order_id,
+        prefill:{name:user.name||'',contact:user.mobile||''},
+        theme:{color:'#E87000'},
+        handler:async function(resp){
+          const vRes=await fetch('api/payment.php?action=verify_razorpay',{
+            method:'POST',headers,
+            body:JSON.stringify({...resp,amount:total*100,address_id:selectedAddress,items:cart})
+          });
+          const vData=await vRes.json();
+          if(vData.success){
+            localStorage.removeItem('hw_cart');
+            window.location.href='account.html?tab=orders&status=paid';
+          } else showAlert('Payment verification failed. Contact support.','error');
+        },
+        modal:{ondismiss:()=>{btn.disabled=false;btn.textContent='Place Order →';}}
+      };
+      new Razorpay(options).open();
+    }catch(e){showAlert('Payment error. Try again.','error');btn.disabled=false;btn.textContent='Place Order →';}
+  }
+
+  async function payuCheckout(btn){
+    try{
+      const res=await fetch('api/payment.php?action=payu_hash',{method:'POST',headers,body:JSON.stringify({amount:total,name:user.name||'Customer',email:user.email||'',phone:user.mobile||''})});
+      const data=await res.json();
+      if(!data.success){showAlert(data.error,'error');btn.disabled=false;btn.textContent='Place Order →';return;}
+      const form=document.createElement('form');
+      form.method='POST';form.action=data.payu_url;
+      const fields={key:data.key,txnid:data.txn_id,productinfo:data.product,amount:data.amount,email:user.email||'customer@harmaalwale.com',firstname:user.name||'Customer',phone:user.mobile||'',surl:window.location.origin+'/api/payment.php?action=payu_success',furl:window.location.origin+'/checkout.html?status=failed',hash:data.hash};
+      Object.entries(fields).forEach(([k,v])=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=v;form.appendChild(i);});
+      document.body.appendChild(form);form.submit();
+    }catch(e){showAlert('PayU error. Try again.','error');btn.disabled=false;btn.textContent='Place Order →';}
+  }
+
+  async function codOrder(btn){
+    showAlert('Cash on delivery will be implemented soon. Please use Razorpay or PayU.','info');
+    btn.disabled=false;btn.textContent='Place Order →';
+  }
+
+  function showAlert(msg,type){document.getElementById('mainAlert').innerHTML=`<div class="alert alert-${type}">${msg}</div>`;}
+
+  loadAddresses();
+  const status=new URLSearchParams(window.location.search).get('status');
+  if(status==='failed') showAlert('Payment failed. Please try again.','error');
+</script>
+</body>
+</html>

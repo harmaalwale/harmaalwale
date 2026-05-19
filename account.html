@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Account – HarmaalWale</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+    <link rel="canonical" href="https://harmaalwale.com/account.html">
+    <meta name="description" content="Login or register on HarmaalWale. Manage your orders, wishlist and account details.">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hw.css">
+  <style>
+    .account-layout{display:grid;grid-template-columns:240px 1fr;gap:24px;max-width:1100px;margin:0 auto;padding:32px 24px;}
+    .sidebar{position:sticky;top:88px;height:fit-content;}
+    .user-card{background:var(--bg-2);border:1.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;margin-bottom:12px;}
+    .user-avatar{width:64px;height:64px;border-radius:50%;background:var(--accent);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+    .user-name{font-weight:700;font-size:15px;color:var(--text);}
+    .user-mobile{font-size:12px;color:var(--text-3);margin-top:2px;}
+    .nav-menu{background:var(--bg-2);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;font-size:14px;font-weight:600;color:var(--text-2);cursor:pointer;border-bottom:1px solid var(--border);transition:all .2s;}
+    .nav-item:last-child{border-bottom:none;}
+    .nav-item:hover{background:var(--bg-3);color:var(--accent);}
+    .nav-item.active{background:var(--accent);color:#fff;}
+    .tab-panel{display:none;} .tab-panel.active{display:block;}
+    .panel-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--text);margin-bottom:20px;}
+    .panel-title span{color:var(--accent);}
+    .order-card{background:var(--bg-2);border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+    .order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+    .order-ref{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+    .order-status{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+    .status-placed{background:#eff6ff;color:#1d4ed8;}.status-confirmed{background:#f0fdf4;color:#15803d;}.status-shipped{background:#fff7ed;color:#c2410c;}.status-delivered{background:#f0fdf4;color:#15803d;}.status-cancelled{background:#fef2f2;color:#b91c1c;}
+    [data-theme="dark"] .status-placed{background:#0e1a2d;color:#60a5fa;}[data-theme="dark"] .status-confirmed{background:#0d2818;color:#4ade80;}[data-theme="dark"] .status-delivered{background:#0d2818;color:#4ade80;}
+    .order-items{display:flex;flex-direction:column;gap:8px;}
+    .order-item{display:flex;gap:12px;align-items:center;font-size:13px;color:var(--text-2);}
+    .order-total{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-weight:700;}
+    .addr-card{background:var(--bg-2);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;position:relative;}
+    .addr-card.default{border-color:var(--accent);}
+    .addr-actions{display:flex;gap:8px;margin-top:10px;}
+    .addr-btn{font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--text-2);font-family:Barlow,sans-serif;transition:all .2s;}
+    .addr-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .wish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+    .wish-card{background:var(--bg-2);border:1.5px solid var(--border);border-radius:10px;overflow:hidden;transition:all .2s;}
+    .wish-card:hover{border-color:var(--accent);}
+    .wish-img{height:140px;background:var(--bg-3);display:flex;align-items:center;justify-content:center;font-size:40px;}
+    .wish-body{padding:12px;}
+    .wish-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;}
+    .wish-actions{display:flex;gap:6px;}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
+    .modal-box{background:var(--bg-2);border-radius:16px;padding:28px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:20px;}
+    .empty-state{text-align:center;padding:60px 20px;}
+    .empty-state .icon{font-size:48px;margin-bottom:16px;}
+    .empty-state h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px;}
+    .empty-state p{font-size:13px;color:var(--text-3);}
+    @media(max-width:768px){.account-layout{grid-template-columns:1fr;}.sidebar{position:static;}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-back" href="index.html">← Home</a>
+  <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label" id="themeLabel">Light</span>
+    </div>
+    <button onclick="logout()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:Barlow,sans-serif;">Logout</button>
+  </div>
+</nav>
+
+<div class="account-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div class="user-name" id="userName">Loading...</div>
+      <div class="user-mobile" id="userMobile"></div>
+    </div>
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="switchTab('orders',this)">📦 My Orders</div>
+      <div class="nav-item" onclick="switchTab('wishlist',this)">❤️ Wishlist</div>
+      <div class="nav-item" onclick="switchTab('addresses',this)">📍 Addresses</div>
+      <div class="nav-item" onclick="switchTab('profile',this)">👤 Edit Profile</div>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main>
+    <!-- Orders -->
+    <div class="tab-panel active" id="tab-orders">
+      <div class="panel-title">My <span>Orders</span></div>
+      <div id="ordersList"><div class="empty-state"><div class="spinner" style="margin:0 auto"></div></div></div>
+    </div>
+
+    <!-- Wishlist -->
+    <div class="tab-panel" id="tab-wishlist">
+      <div class="panel-title">My <span>Wishlist</span></div>
+      <div class="wish-grid" id="wishlistGrid"></div>
+    </div>
+
+    <!-- Addresses -->
+    <div class="tab-panel" id="tab-addresses">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div class="panel-title" style="margin:0">My <span>Addresses</span></div>
+        <button class="btn btn-primary btn-sm" onclick="showAddressModal()">+ Add New</button>
+      </div>
+      <div id="addressesList"></div>
+    </div>
+
+    <!-- Profile -->
+    <div class="tab-panel" id="tab-profile">
+      <div class="panel-title">Edit <span>Profile</span></div>
+      <div style="max-width:480px">
+        <div id="profileAlert"></div>
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="pName" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input type="email" id="pEmail" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Mobile Number</label><input type="text" id="pMobile" class="form-input" disabled style="opacity:.6"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" id="pDob" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Gender</label>
+            <select id="pGender" class="form-select"><option value="">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Address Modal -->
+<div class="modal" id="addrModal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="addrModalTitle">Add New Address</div>
+    <div id="addrAlert"></div>
+    <input type="hidden" id="addrId">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-group"><label class="form-label">Label</label>
+        <select id="aLabel" class="form-select"><option>Home</option><option>Work</option><option>Other</option></select></div>
+      <div class="form-group"><label class="form-label">Full Name <span>*</span></label><input type="text" id="aName" class="form-input" placeholder="Recipient name"></div>
+      <div class="form-group"><label class="form-label">Mobile <span>*</span></label><input type="tel" id="aMobile" class="form-input" placeholder="10-digit"></div>
+      <div class="form-group"><label class="form-label">Pincode <span>*</span></label><input type="text" id="aPincode" class="form-input" placeholder="6-digit pincode"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Address Line 1 <span>*</span></label><input type="text" id="aLine1" class="form-input" placeholder="House/Flat, Street, Area"></div>
+    <div class="form-group"><label class="form-label">Address Line 2</label><input type="text" id="aLine2" class="form-input" placeholder="Landmark (optional)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-group"><label class="form-label">City <span>*</span></label><input type="text" id="aCity" class="form-input" placeholder="City"></div>
+      <div class="form-group"><label class="form-label">State <span>*</span></label><input type="text" id="aState" class="form-input" placeholder="State"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveAddress()">Save Address</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<a class="wa-float" href="https://wa.me/917891004042" target="_blank">💬</a>
+
+<script>
+  const html=document.documentElement,lbl=document.getElementById('themeLabel');
+  const saved=localStorage.getItem('hw-theme')||'light';
+  setTheme(saved);
+  function setTheme(t){html.setAttribute('data-theme',t);lbl.textContent=t==='dark'?'Dark':'Light';localStorage.setItem('hw-theme',t);}
+  function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
+
+  const token = localStorage.getItem('hw_token');
+  if (!token) window.location.href = 'login.html?redirect=account.html';
+
+  const headers = { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token };
+  let user = JSON.parse(localStorage.getItem('hw_user') || '{}');
+
+  // Init user display
+  function initUser() {
+    document.getElementById('userAvatar').textContent = (user.name||'U')[0].toUpperCase();
+    document.getElementById('userName').textContent = user.name || 'User';
+    document.getElementById('userMobile').textContent = '+91 ' + (user.mobile||'');
+    document.getElementById('pName').value = user.name||'';
+    document.getElementById('pEmail').value = user.email||'';
+    document.getElementById('pMobile').value = user.mobile||'';
+  }
+  initUser();
+
+  // Tab switching
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    el.classList.add('active');
+    if (tab==='orders') loadOrders();
+    if (tab==='wishlist') loadWishlist();
+    if (tab==='addresses') loadAddresses();
+    if (tab==='profile') loadProfile();
+  }
+
+  // Orders
+  async function loadOrders() {
+    try {
+      const res = await fetch('api/users.php?action=orders', {headers});
+      const data = await res.json();
+      const el = document.getElementById('ordersList');
+      if (!data.orders?.length) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">📦</div><h3>No orders yet</h3><p>Your orders will appear here once you place them.</p><a class="btn btn-primary" href="mfd-spares.html" style="margin-top:16px">Shop Now →</a></div>`;
+        return;
+      }
+      el.innerHTML = data.orders.map(o => `
+        <div class="order-card">
+          <div class="order-header">
+            <div><div class="order-ref">#${o.order_ref}</div><div style="font-size:11px;color:var(--text-3)">${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div></div>
+            <span class="order-status status-${o.status}">${o.status}</span>
+          </div>
+          <div class="order-items">${(o.items||[]).map(i=>`<div class="order-item">• ${i.name} × ${i.quantity}</div>`).join('')}</div>
+          <div class="order-total"><span>Total</span><span>₹${parseFloat(o.total).toLocaleString('en-IN')}</span></div>
+        </div>`).join('');
+    } catch(e) { document.getElementById('ordersList').innerHTML = '<div class="alert alert-error">Failed to load orders</div>'; }
+  }
+
+  // Wishlist
+  async function loadWishlist() {
+    const res = await fetch('api/users.php?action=wishlist', {headers});
+    const data = await res.json();
+    const el = document.getElementById('wishlistGrid');
+    if (!data.items?.length) {
+      el.outerHTML = `<div class="empty-state"><div class="icon">❤️</div><h3>Wishlist is empty</h3><p>Save products you love to find them later.</p></div>`;
+      return;
+    }
+    el.innerHTML = data.items.map(item => `
+      <div class="wish-card">
+        <div class="wish-img">${item.image ? `<img src="${item.image}" style="max-height:100%;max-width:100%;object-fit:contain;padding:8px">` : '🖨️'}</div>
+        <div class="wish-body">
+          <div class="wish-name">${item.name}</div>
+          <div class="wish-actions">
+            <button class="btn btn-primary btn-sm" onclick="window.location.href='mfd-spares.html'">Shop</button>
+            <button class="btn btn-secondary btn-sm" onclick="removeWishlist(${item.id})">Remove</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function removeWishlist(id) {
+    await fetch(`/api/users.php?action=remove_wishlist&id=${id}`, {method:'DELETE',headers});
+    loadWishlist();
+  }
+
+  // Addresses
+  async function loadAddresses() {
+    const res = await fetch('api/users.php?action=addresses', {headers});
+    const data = await res.json();
+    const el = document.getElementById('addressesList');
+    if (!data.addresses?.length) {
+      el.innerHTML = `<div class="empty-state"><div class="icon">📍</div><h3>No addresses saved</h3><p>Add a delivery address to speed up checkout.</p></div>`;
+      return;
+    }
+    el.innerHTML = data.addresses.map(a => `
+      <div class="addr-card ${a.is_default?'default':''}">
+        ${a.is_default?'<span class="tag tag-green" style="position:absolute;top:12px;right:12px">Default</span>':''}
+        <div style="font-weight:700;font-size:14px;color:var(--text)">${a.label} — ${a.name}</div>
+        <div style="font-size:13px;color:var(--text-3);margin-top:4px;line-height:1.5">${a.line1}${a.line2?', '+a.line2:''}, ${a.city}, ${a.state} — ${a.pincode}<br>📞 ${a.mobile}</div>
+        <div class="addr-actions">
+          ${!a.is_default?`<button class="addr-btn" onclick="setDefault(${a.id})">Set Default</button>`:''}
+          <button class="addr-btn" onclick="editAddress(${JSON.stringify(a).replace(/"/g,'&quot;')})">Edit</button>
+          <button class="addr-btn" style="color:var(--error);border-color:var(--error)" onclick="deleteAddr(${a.id})">Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function showAddressModal(addr=null) {
+    document.getElementById('addrId').value = addr?.id||'';
+    document.getElementById('aLabel').value = addr?.label||'Home';
+    document.getElementById('aName').value = addr?.name||'';
+    document.getElementById('aMobile').value = addr?.mobile||'';
+    document.getElementById('aLine1').value = addr?.line1||'';
+    document.getElementById('aLine2').value = addr?.line2||'';
+    document.getElementById('aCity').value = addr?.city||'';
+    document.getElementById('aState').value = addr?.state||'';
+    document.getElementById('aPincode').value = addr?.pincode||'';
+    document.getElementById('addrModalTitle').textContent = addr ? 'Edit Address' : 'Add New Address';
+    document.getElementById('addrModal').style.display='flex';
+  }
+
+  function editAddress(a) { showAddressModal(a); }
+  function closeModal() { document.getElementById('addrModal').style.display='none'; }
+
+  async function saveAddress() {
+    const id = document.getElementById('addrId').value;
+    const body = {
+      label:document.getElementById('aLabel').value,
+      name:document.getElementById('aName').value,
+      mobile:document.getElementById('aMobile').value,
+      line1:document.getElementById('aLine1').value,
+      line2:document.getElementById('aLine2').value,
+      city:document.getElementById('aCity').value,
+      state:document.getElementById('aState').value,
+      pincode:document.getElementById('aPincode').value
+    };
+    const action = id ? 'update_address' : 'add_address';
+    const url = id ? `/api/users.php?action=${action}&id=${id}` : `/api/users.php?action=${action}`;
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, {method, headers, body:JSON.stringify(body)});
+    const data = await res.json();
+    if (data.success) { closeModal(); loadAddresses(); }
+    else document.getElementById('addrAlert').innerHTML=`<div class="alert alert-error">${data.error}</div>`;
+  }
+
+  async function setDefault(id) {
+    await fetch(`/api/users.php?action=set_default_address&id=${id}`, {method:'POST',headers});
+    loadAddresses();
+  }
+
+  async function deleteAddr(id) {
+    if (!confirm('Delete this address?')) return;
+    await fetch(`/api/users.php?action=delete_address&id=${id}`, {method:'DELETE',headers});
+    loadAddresses();
+  }
+
+  // Profile
+  async function loadProfile() {
+    const res = await fetch('api/users.php?action=profile', {headers});
+    const data = await res.json();
+    if (data.user) {
+      user = data.user;
+      document.getElementById('pName').value = data.user.name||'';
+      document.getElementById('pEmail').value = data.user.email||'';
+      document.getElementById('pMobile').value = data.user.mobile||'';
+      document.getElementById('pDob').value = data.user.dob||'';
+      document.getElementById('pGender').value = data.user.gender||'';
+    }
+  }
+
+  async function saveProfile() {
+    const body={name:document.getElementById('pName').value,email:document.getElementById('pEmail').value,dob:document.getElementById('pDob').value,gender:document.getElementById('pGender').value};
+    const res=await fetch('api/auth.php?action=update_profile',{method:'POST',headers,body:JSON.stringify(body)});
+    const data=await res.json();
+    const el=document.getElementById('profileAlert');
+    if(data.success){localStorage.setItem('hw_user',JSON.stringify(data.user));initUser();el.innerHTML='<div class="alert alert-success">Profile updated successfully!</div>';setTimeout(()=>el.innerHTML='',3000);}
+    else el.innerHTML=`<div class="alert alert-error">${data.error}</div>`;
+  }
+
+  function logout() {
+    localStorage.removeItem('hw_token');
+    localStorage.removeItem('hw_user');
+    window.location.href='index.html';
+  }
+
+  // Load initial tab
+  loadOrders();
+
+  // Check URL params
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('tab')==='orders') loadOrders();
+</script>
+</body>
+</html>

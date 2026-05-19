@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cart – HarmaalWale</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+    <link rel="canonical" href="https://harmaalwale.com/cart.html">
+    <meta name="description" content="Your HarmaalWale shopping cart. Review items and proceed to checkout for fast pan India delivery.">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hw.css">
+  <style>
+    .cart-layout{display:grid;grid-template-columns:1fr 340px;gap:24px;max-width:1100px;margin:0 auto;padding:32px 24px;}
+    .cart-item{background:var(--bg-2);border:1.5px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:16px;align-items:flex-start;transition:border-color .2s;}
+    .cart-item:hover{border-color:var(--accent);}
+    .cart-img{width:80px;height:80px;background:var(--bg-3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;}
+    .cart-img img{max-width:100%;max-height:100%;object-fit:contain;}
+    .cart-info{flex:1;}
+    .cart-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px;}
+    .cart-cat{font-size:11px;color:var(--text-3);margin-bottom:8px;}
+    .cart-price{font-size:16px;font-weight:700;color:var(--accent);}
+    .qty-ctrl{display:flex;align-items:center;gap:8px;margin-top:10px;}
+    .qty-btn{width:30px;height:30px;border:1.5px solid var(--border);background:var(--bg-3);border-radius:6px;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text);transition:all .2s;}
+    .qty-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .qty-num{font-weight:700;font-size:15px;color:var(--text);min-width:24px;text-align:center;}
+    .remove-btn{font-size:12px;color:var(--error);cursor:pointer;font-weight:600;border:none;background:none;font-family:Barlow,sans-serif;padding:0;margin-top:8px;display:block;}
+    .remove-btn:hover{text-decoration:underline;}
+    .summary-box{background:var(--bg-2);border:1.5px solid var(--border);border-radius:12px;padding:20px;position:sticky;top:88px;}
+    .summary-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:16px;}
+    .summary-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-2);margin-bottom:10px;}
+    .summary-total{display:flex;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--text);border-top:1px solid var(--border);padding-top:14px;margin-top:6px;}
+    .coupon-row{display:flex;gap:8px;margin:16px 0;}
+    .coupon-row input{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-3);color:var(--text);font-size:13px;font-family:Barlow,sans-serif;outline:none;}
+    .coupon-row input:focus{border-color:var(--accent);}
+    .empty-cart{text-align:center;padding:80px 20px;}
+    .empty-cart .icon{font-size:64px;margin-bottom:20px;}
+    .empty-cart h2{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--text);}
+    .empty-cart p{font-size:14px;color:var(--text-3);margin-top:8px;}
+    @media(max-width:768px){.cart-layout{grid-template-columns:1fr;}.summary-box{position:static;}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-back" href="index.html">← Home</a>
+  <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="hwToggleTheme()">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label">Light</span>
+    </div>
+    <a class="nav-icon nav-user-icon" href="#" data-action="login" title="Account">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </a>
+    <a class="nav-icon" href="wishlist.html" title="Wishlist" style="position:relative">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="nav-badge wishlist-badge" style="display:none">0</span>
+    </a>
+  </div>
+</nav>
+
+<div class="cart-layout" id="cartLayout">
+  <!-- Will be rendered by JS -->
+</div>
+
+<a class="wa-float" href="https://wa.me/917891004042" target="_blank">💬</a>
+<script src="assets/js/hw.js"></script>
+<script>
+  function renderCart() {
+    const cart = HW.getCart();
+    const layout = document.getElementById('cartLayout');
+
+    if (!cart.length) {
+      layout.innerHTML = `<div class="empty-cart" style="grid-column:1/-1">
+        <div class="icon">🛒</div>
+        <h2>Your Cart is Empty</h2>
+        <p>Add products to get started</p>
+        <a href="mfd-spares.html" class="btn btn-primary" style="margin-top:20px">Shop MFD Spares →</a>
+      </div>`;
+      return;
+    }
+
+    const subtotal = cart.reduce((s, i) => s + (parseFloat(i.price||0) * (i.quantity||1)), 0);
+
+    layout.innerHTML = `
+      <div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--text);margin-bottom:20px">
+          MY CART <span style="color:var(--accent)">(${cart.length} items)</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px" id="cartItemsList">
+          ${cart.map(item => `
+            <div class="cart-item" id="ci-${item.id}">
+              <div class="cart-img">${item.image ? `<img src="${item.image}" alt="${item.name}">` : '🖨️'}</div>
+              <div class="cart-info">
+                <div class="cart-name">${item.name}</div>
+                <div class="cart-cat">${item.category || 'MFD Spare'}</div>
+                <div class="cart-price">${item.price ? '₹' + parseFloat(item.price).toLocaleString('en-IN') : 'Price on enquiry'}</div>
+                <div class="qty-ctrl">
+                  <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+                  <span class="qty-num">${item.quantity || 1}</span>
+                  <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+                  <span style="font-size:12px;color:var(--text-3);margin-left:8px">
+                    ${item.price ? '= ₹' + (parseFloat(item.price) * (item.quantity||1)).toLocaleString('en-IN') : ''}
+                  </span>
+                </div>
+                <button class="remove-btn" onclick="removeItem('${item.id}')">✕ Remove</button>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+          <a href="mfd-spares.html" class="btn btn-secondary btn-sm">← Continue Shopping</a>
+          <button class="btn btn-secondary btn-sm" onclick="clearCart()" style="color:var(--error);border-color:var(--error)">Clear Cart</button>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-title">Order Summary</div>
+        <div class="coupon-row">
+          <input type="text" id="couponInput" placeholder="Coupon code">
+          <button class="btn btn-secondary btn-sm" onclick="applyCoupon()">Apply</button>
+        </div>
+        <div id="couponMsg" style="font-size:12px;margin-bottom:8px"></div>
+        <div class="summary-row"><span>Subtotal (${cart.length} items)</span><span id="subtotalAmt">₹${subtotal.toLocaleString('en-IN')}</span></div>
+        <div class="summary-row"><span>Shipping</span><span style="color:var(--success)">FREE</span></div>
+        <div class="summary-row"><span>Discount</span><span id="discountAmt" style="color:var(--success)">—</span></div>
+        <div class="summary-total">
+          <span>Total</span><span id="totalAmt">₹${subtotal.toLocaleString('en-IN')}</span>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="proceedToCheckout()">Proceed to Checkout →</button>
+        <p style="font-size:11px;color:var(--text-3);text-align:center;margin-top:8px">🔒 Safe & encrypted checkout</p>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-weight:600">WE ACCEPT</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="tag">Razorpay</span><span class="tag">PayU</span><span class="tag">UPI</span><span class="tag">Cards</span><span class="tag">Net Banking</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function changeQty(id, delta) {
+    const cart = HW.getCart();
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+    item.quantity = Math.max(1, (item.quantity || 1) + delta);
+    HW.saveCart(cart);
+    renderCart();
+  }
+
+  function removeItem(id) {
+    HW.removeFromCart(id);
+    renderCart();
+  }
+
+  function clearCart() {
+    if (!confirm('Clear all items from cart?')) return;
+    HW.saveCart([]);
+    renderCart();
+  }
+
+  function applyCoupon() {
+    const code = document.getElementById('couponInput').value.trim().toUpperCase();
+    const el = document.getElementById('couponMsg');
+    // Simple demo coupons
+    const coupons = { 'HW10': 10, 'HW20': 20, 'FIRST': 15 };
+    if (coupons[code]) {
+      const cart = HW.getCart();
+      const subtotal = cart.reduce((s,i) => s + (parseFloat(i.price||0)*(i.quantity||1)), 0);
+      const discount = subtotal * (coupons[code]/100);
+      document.getElementById('discountAmt').textContent = '−₹' + discount.toFixed(2);
+      document.getElementById('totalAmt').textContent = '₹' + (subtotal-discount).toLocaleString('en-IN');
+      el.innerHTML = `<span style="color:var(--success)">✅ ${coupons[code]}% discount applied!</span>`;
+    } else {
+      el.innerHTML = `<span style="color:var(--error)">Invalid coupon code</span>`;
+    }
+  }
+
+  function proceedToCheckout() {
+    if (!HW.isLoggedIn()) {
+      window.location.href = 'login.html?redirect=checkout.html';
+      return;
+    }
+    const cart = HW.getCart();
+    if (!cart.length) { HW.showToast('Cart is empty','error'); return; }
+    window.location.href = 'checkout.html';
+  }
+
+  renderCart();
+</script>
+</body>
+</html>

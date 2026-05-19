@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HarmaalWale – All in one Store | Jaipur, India</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+    <link rel="canonical" href="https://harmaalwale.com/">
+  <meta name="description" content="Shop from hundreds of products across fashion, electronics, daily essentials, and more. Pan India delivery from Jaipur.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── THEME VARIABLES ─────────────────────────────── */
+    :root {
+      --accent: #E87000;
+      --accent-hover: #cf6600;
+      --wa: #25D366;
+
+      /* Light theme defaults */
+      --bg: #F4F2EF;
+      --bg-2: #FFFFFF;
+      --bg-3: #EBEBEB;
+      --text: #111111;
+      --text-2: #444444;
+      --text-3: #888888;
+      --border: #DEDEDE;
+      --nav-bg: #FFFFFF;
+      --nav-border: #E8E8E8;
+      --hero-bg: linear-gradient(135deg, #F4F2EF 0%, #FFE8CE 100%);
+      --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --card-shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
+      --strip-bg: #E87000;
+      --strip-text: #fff;
+      --stat-bg: #FFFFFF;
+      --feat-bg: #FFFFFF;
+      --feat-border: #E8E8E8;
+      --cta-bg: #111111;
+      --cta-text: #FFFFFF;
+      --footer-bg: #111111;
+      --footer-text: #AAAAAA;
+      --toggle-bg: #E8E8E8;
+      --toggle-knob: #FFFFFF;
+      --coming-soon-bg: rgba(0,0,0,0.55);
+    }
+
+    [data-theme="dark"] {
+      --bg: #111111;
+      --bg-2: #1a1a1a;
+      --bg-3: #222222;
+      --text: #FFFFFF;
+      --text-2: #CCCCCC;
+      --text-3: #888888;
+      --border: #2a2a2a;
+      --nav-bg: #000000;
+      --nav-border: #1a1a1a;
+      --hero-bg: linear-gradient(135deg, #0a0a0a 0%, #1a0f00 100%);
+      --card-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      --card-shadow-hover: 0 8px 32px rgba(232,112,0,0.15);
+      --strip-bg: #E87000;
+      --strip-text: #fff;
+      --stat-bg: #1a1a1a;
+      --feat-bg: #1a1a1a;
+      --feat-border: #2a2a2a;
+      --cta-bg: #1a1a1a;
+      --cta-text: #FFFFFF;
+      --footer-bg: #000000;
+      --footer-text: #666666;
+      --toggle-bg: #333333;
+      --toggle-knob: #E87000;
+      --coming-soon-bg: rgba(0,0,0,0.65);
+    }
+
+    /* ── RESET ───────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Barlow, sans-serif;
+      transition: background .3s, color .3s;
+    }
+
+    /* ── NAV ─────────────────────────────────────────── */
+    .nav {
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--nav-border);
+      padding: 0 28px;
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 1px 0 var(--nav-border);
+      transition: background .3s, border-color .3s;
+    }
+    .nav-left { display: flex; align-items: center; gap: 40px; }
+    .nav-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -.5px;
+      transition: color .3s;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-search {
+      display: flex;
+      align-items: center;
+      background: var(--bg-3);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0 14px;
+      height: 38px;
+      gap: 8px;
+      width: 280px;
+      transition: border-color .2s, background .3s;
+    }
+    .nav-search:focus-within { border-color: var(--accent); }
+    .nav-search input {
+      background: none;
+      border: none;
+      outline: none;
+      font-family: Barlow, sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      width: 100%;
+    }
+    .nav-search input::placeholder { color: var(--text-3); }
+    .nav-search svg { color: var(--text-3); flex-shrink: 0; }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    /* ── THEME TOGGLE ────────────────────────────────── */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      background: var(--bg-3);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 10px 5px 8px;
+      transition: all .2s;
+      user-select: none;
+    }
+    .theme-toggle:hover { border-color: var(--accent); }
+    .theme-toggle .toggle-track {
+      width: 34px;
+      height: 18px;
+      background: var(--toggle-bg);
+      border-radius: 9px;
+      position: relative;
+      transition: background .3s;
+    }
+    .theme-toggle .toggle-knob {
+      width: 14px;
+      height: 14px;
+      background: var(--toggle-knob);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform .3s, background .3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    [data-theme="dark"] .theme-toggle .toggle-knob { transform: translateX(16px); }
+    .theme-toggle .toggle-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      transition: color .3s;
+    }
+
+    .nav-wa {
+      background: var(--wa);
+      color: #fff;
+      padding: 9px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: .5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .2s;
+    }
+    .nav-wa:hover { background: #1ebc58; }
+
+    .nav-icon {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .nav-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── CATEGORY NAV ────────────────────────────────── */
+    .cat-nav {
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--nav-border);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      transition: background .3s;
+    }
+    .cat-nav::-webkit-scrollbar { display: none; }
+    .cat-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: var(--text-3);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+      white-space: nowrap;
+      position: relative;
+    }
+    .cat-nav-item:hover { color: var(--accent); }
+    .cat-nav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .cat-nav-item svg { font-size: 20px; }
+    .cat-soon {
+      font-size: 9px;
+      background: var(--accent);
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      position: absolute;
+      top: 8px;
+      right: 10px;
+    }
+
+    /* ── HERO ────────────────────────────────────────── */
+    .hero {
+      background: var(--hero-bg);
+      padding: 80px 28px 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      border-bottom: 1px solid var(--border);
+      transition: background .3s;
+    }
+    .hero-left { max-width: 560px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(52px, 7vw, 84px);
+      font-weight: 900;
+      color: var(--text);
+      line-height: .95;
+      margin-bottom: 20px;
+      transition: color .3s;
+    }
+    .hero h1 .orange { color: var(--accent); }
+    .hero p {
+      color: var(--text-2);
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+      transition: color .3s;
+    }
+    .hero p a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      letter-spacing: .5px;
+      display: flex; align-items: center; gap: 8px;
+      transition: background .2s, transform .2s;
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      padding: 14px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      letter-spacing: .5px;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      transition: all .2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Hero right — stats orbit */
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .hero-stat {
+      background: var(--bg-2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      transition: background .3s, border-color .3s;
+    }
+    .hero-stat strong {
+      display: block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    .hero-stat span {
+      font-size: 10px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    /* ── TRUST STRIP ─────────────────────────────────── */
+    .trust-strip {
+      background: var(--strip-bg);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 32px;
+      color: var(--strip-text);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: .5px;
+    }
+    .trust-item + .trust-item {
+      border-left: 1px solid rgba(255,255,255,.3);
+    }
+    .trust-item span { font-size: 11px; font-weight: 400; opacity: .85; }
+
+    /* ── SECTIONS ────────────────────────────────────── */
+    .section { padding: 64px 28px; max-width: 1280px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 40px; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 900;
+      color: var(--text);
+      transition: color .3s;
+    }
+    .section-title span { color: var(--accent); }
+    .section-sub {
+      color: var(--text-3);
+      font-size: 14px;
+      margin-top: 8px;
+      transition: color .3s;
+    }
+    .section-sub a { color: var(--accent); }
+
+    /* ── CATEGORY CARDS ──────────────────────────────── */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .cat-card {
+      background: var(--bg-2);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+      box-shadow: var(--card-shadow);
+      display: block;
+      position: relative;
+    }
+    .cat-card:hover { border-color: var(--accent); box-shadow: var(--card-shadow-hover); transform: translateY(-3px); }
+    .cat-card-img {
+      height: 160px;
+      background: var(--bg-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      position: relative;
+      overflow: hidden;
+      transition: background .3s;
+    }
+    .cat-card-img.mfd { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+    .cat-card-img.fashion { background: linear-gradient(135deg, #f8e1e7, #ffd6d6); }
+    .cat-card-img.it { background: linear-gradient(135deg, #e8f4fd, #d6e9f8); }
+    .cat-card-img.custom { background: linear-gradient(135deg, #fff3e0, #ffe0b2); }
+
+    .cat-coming-soon {
+      position: absolute;
+      inset: 0;
+      background: var(--coming-soon-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cat-coming-soon span {
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 8px 18px;
+      border-radius: 6px;
+      letter-spacing: 2px;
+      transform: rotate(-2deg);
+    }
+    .cat-card-body { padding: 18px 20px; }
+    .cat-card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 4px;
+      transition: color .3s;
+    }
+    .cat-card-desc { font-size: 12px; color: var(--text-3); line-height: 1.4; margin-bottom: 14px; transition: color .3s; }
+    .cat-card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .cat-tag {
+      font-size: 10px;
+      background: var(--bg-3);
+      color: var(--text-2);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      transition: background .3s, color .3s, border-color .3s;
+    }
+    .cat-tag.green { background: #e8f8ef; color: #16a34a; border-color: #bbf7d0; }
+    [data-theme="dark"] .cat-tag.green { background: #0d2818; color: #4ade80; border-color: #166534; }
+    .cat-link {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: .5px;
+    }
+
+    /* ── WHY SECTION ─────────────────────────────────── */
+    .why-section {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 28px;
+      transition: background .3s;
+    }
+    .why-grid {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .why-left .section-header { text-align: left; }
+    .why-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .why-stat {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: background .3s, border-color .3s;
+    }
+    .why-stat strong {
+      display: block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .why-stat span { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .why-stat p { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+
+    .why-feats { display: flex; flex-direction: column; gap: 14px; }
+    .why-feat {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: background .3s, border-color .3s;
+    }
+    .why-feat:hover { border-color: var(--accent); }
+    .why-feat-icon {
+      width: 44px; height: 44px;
+      background: #fff3e0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    [data-theme="dark"] .why-feat-icon { background: #2a1a00; }
+    .why-feat-title { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 2px; transition: color .3s; }
+    .why-feat-sub { font-size: 12px; color: var(--text-3); transition: color .3s; }
+
+    /* ── SOURCE CTA ──────────────────────────────────── */
+    .source-section {
+      background: var(--bg);
+      padding: 64px 28px;
+      transition: background .3s;
+    }
+    .source-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      background: var(--text);
+      border-radius: 20px;
+      padding: 60px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      transition: background .3s;
+    }
+    [data-theme="dark"] .source-inner { background: var(--bg-2); border: 1px solid var(--border); }
+    .source-left h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+    [data-theme="dark"] .source-left h2 { color: var(--text); }
+    .source-left h2 span { color: var(--accent); }
+    .source-left p { font-size: 14px; color: rgba(255,255,255,.6); line-height: 1.6; }
+    [data-theme="dark"] .source-left p { color: var(--text-3); }
+    .source-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .source-tag {
+      font-size: 11px;
+      background: rgba(255,255,255,.1);
+      color: rgba(255,255,255,.8);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.15);
+    }
+    [data-theme="dark"] .source-tag { background: var(--bg-3); color: var(--text-2); border-color: var(--border); }
+    .source-btns { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .btn-wa {
+      background: var(--wa);
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px;
+      letter-spacing: .5px;
+      display: flex; align-items: center; gap: 8px;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .btn-wa:hover { background: #1ebc58; }
+    .btn-enq {
+      background: var(--accent);
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px;
+      letter-spacing: .5px;
+      display: flex; align-items: center; gap: 8px;
+      white-space: nowrap;
+      text-align: center; justify-content: center;
+      transition: background .2s;
+    }
+    .btn-enq:hover { background: var(--accent-hover); }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer {
+      background: var(--footer-bg);
+      border-top: 1px solid var(--border);
+      padding: 56px 28px 32px;
+      transition: background .3s;
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-brand .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .footer-brand .logo span { color: var(--accent); }
+    .footer-brand p { font-size: 13px; color: var(--footer-text); line-height: 1.6; }
+    .footer-col h4 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col ul li a { font-size: 13px; color: var(--footer-text); text-decoration: none; transition: color .2s; }
+    .footer-col ul li a:hover { color: var(--accent); }
+    .footer-col ul li a.highlight { color: var(--accent); font-weight: 600; }
+    .footer-bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      border-top: 1px solid #222;
+      padding-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-bottom p { font-size: 12px; color: var(--footer-text); }
+    .footer-bottom span { color: #e44; }
+
+    /* ── FLOATING WA ─────────────────────────────────── */
+    .wa-float {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--wa);
+      color: #fff;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 22px;
+      box-shadow: 0 4px 20px rgba(37,211,102,.4);
+      z-index: 99;
+      transition: transform .2s;
+    }
+    .wa-float:hover { transform: scale(1.1); }
+
+    /* ── DIVIDER ─────────────────────────────────────── */
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 1280px;
+      margin: 0 auto;
+      transition: background .3s;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .hero { flex-direction: column; text-align: center; }
+      .hero-btns { justify-content: center; }
+      .why-grid { grid-template-columns: 1fr; }
+      .source-inner { flex-direction: column; text-align: center; }
+      .source-btns { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav { padding: 0 16px; }
+      .nav-search { display: none; }
+      .cat-nav { padding: 0 16px; }
+      .hero { padding: 48px 16px; }
+      .section { padding: 48px 16px; }
+      .footer-inner { grid-template-columns: 1fr; }
+      .hero-stats { grid-template-columns: 1fr 1fr 1fr; }
+      .trust-item { padding: 0 16px; }
+      .trust-item span { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-left">
+    <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+    <div class="nav-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search products, brands, categories…">
+    </div>
+  </div>
+  <div class="nav-right">
+
+    <!-- THEME TOGGLE -->
+    <div class="theme-toggle" id="themeToggle" onclick="hwToggleTheme()" title="Switch theme">
+      <div class="toggle-track">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label" id="themeLabel">Light</span>
+    </div>
+
+    <a class="nav-wa" href="https://wa.me/917891004042" target="_blank">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.554 4.122 1.523 5.855L0 24l6.266-1.518A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.37l-.36-.214-3.727.902.944-3.635-.234-.374A9.818 9.818 0 1 1 12 21.818z"/></svg>
+      WhatsApp
+    </a>
+    <a class="nav-icon nav-user-icon" href="#" data-action="login" title="Account">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </a>
+    <a class="nav-icon" href="wishlist.html" title="Wishlist" style="position:relative">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="nav-badge wishlist-badge" style="display:none">0</span>
+    </a>
+    <a class="nav-icon" href="cart.html" title="Cart" style="position:relative">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="nav-badge cart-badge" style="display:none">0</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ── CATEGORY NAV ────────────────────────────────── -->
+<div class="cat-nav">
+  <a class="cat-nav-item" href="#">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+    IT Products
+    <span class="cat-soon">SOON</span>
+  </a>
+  <a class="cat-nav-item active" href="mfd-refurbished.html">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10h8m-8 4h5"/><circle cx="17" cy="4" r="3" fill="currentColor" stroke="none"/></svg>
+    Refurbished MFDs
+  </a>
+  <a class="cat-nav-item" href="mfd-spares.html">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+    MFD Spares
+  </a>
+  <a class="cat-nav-item" href="#">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
+    Fashion
+    <span class="cat-soon">SOON</span>
+  </a>  <a class="cat-nav-item" href="seller.html" style="background:linear-gradient(135deg,#E87000,#cf6600);color:#fff!important;border-radius:6px;margin:8px 4px;padding:8px 14px!important;">
+    🏪
+    SELL WITH US
+  </a>
+  <a class="cat-nav-item" href="support.html">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+    Support
+  </a>
+</div>
+
+<!-- ── HERO ────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">🔥 Everything you need, all in one place</div>
+    <h1>YOUR UNIVERSE<br><span class="orange">OF</span><br>PRODUCTS</h1>
+    <p>Shop from hundreds of products across fashion, electronics, daily essentials, and more — or <a href="https://wa.me/917891004042">ask us</a> for anything you can't find. We bring it to your door.</p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="mfd-spares.html">🛒 Fill Your Cart</a>
+      <a class="btn-secondary" href="need-help.html">🎧 Need Help?</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>500+</strong><span>Products</span></div>
+      <div class="hero-stat"><strong>10+</strong><span>Categories</span></div>
+      <div class="hero-stat"><strong>100%</strong><span>Genuine</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRUST STRIP ────────────────────────────────── -->
+<div class="trust-strip">
+  <div class="trust-item">
+    🚚 <div><b>Pan India Delivery</b><br><span>Fast &amp; Reliable Shipping</span></div>
+  </div>
+  <div class="trust-item">
+    ✅ <div><b>Quality Assured</b><br><span>Tested &amp; Certified</span></div>
+  </div>
+  <div class="trust-item">
+    🔒 <div><b>Secure Checkout</b><br><span>Safe &amp; Encrypted Payments</span></div>
+  </div>
+</div>
+
+<!-- ── SHOP BY CATEGORY ───────────────────────────── -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-label">Browse</div>
+    <h2 class="section-title">SHOP BY <span>CATEGORY</span></h2>
+    <p class="section-sub">Browse our categories — or <a href="https://wa.me/917891004042">ask us</a> for anything not listed here</p>
+  </div>
+  <div class="cat-grid">
+
+    <!-- IT Products -->
+    <a class="cat-card" href="#">
+      <div class="cat-card-img it">
+        💻
+        <div class="cat-coming-soon"><span>LAUNCHING NEXT</span></div>
+      </div>
+      <div class="cat-card-body">
+        <div class="cat-card-title">IT Products</div>
+        <div class="cat-card-desc">Laptops, monitors, accessories and more</div>
+        <div class="cat-card-tags"><span class="cat-tag">Launching Next</span></div>
+      </div>
+    </a>
+
+    <!-- MFD -->
+    <a class="cat-card" href="mfd-spares.html">
+      <div class="cat-card-img mfd">🖨️</div>
+      <div class="cat-card-body">
+        <div class="cat-card-title">MFD</div>
+        <div class="cat-card-desc">Refurbished machines &amp; genuine spare parts</div>
+        <div class="cat-card-tags">
+          <span class="cat-tag green">Refurbished MFDs</span>
+          <span class="cat-tag green">MFD Spares</span>
+        </div>
+        <div class="cat-link">Explore →</div>
+      </div>
+    </a>
+
+    <!-- Fashion -->
+    <a class="cat-card" href="#">
+      <div class="cat-card-img fashion">
+        👕
+        <div class="cat-coming-soon"><span>LAUNCHING NEXT</span></div>
+      </div>
+      <div class="cat-card-body">
+        <div class="cat-card-title">Fashion</div>
+        <div class="cat-card-desc">Jaipur-inspired clothing and accessories</div>
+        <div class="cat-card-tags"><span class="cat-tag">Launching Next</span></div>
+      </div>
+    </a>
+
+    <!-- Custom Orders -->
+    <a class="cat-card" href="https://wa.me/917891004042">
+      <div class="cat-card-img custom">🎯</div>
+      <div class="cat-card-body">
+        <div class="cat-card-title">Custom Orders</div>
+        <div class="cat-card-desc">Can't find it? Ask us — we source anything</div>
+        <div class="cat-card-tags"><span class="cat-tag">B2B Friendly</span><span class="cat-tag">Bulk</span></div>
+        <div class="cat-link">Contact Us →</div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<div style="background:var(--border);height:1px;transition:background .3s;"></div>
+
+<!-- ── WHY HARMAALWALE ─────────────────────────────── -->
+<div class="why-section">
+  <div class="why-grid">
+    <div class="why-left">
+      <div class="section-header">
+        <div class="section-label">Trusted by customers across India</div>
+        <h2 class="section-title">WHY <span>HARMAALWALE?</span></h2>
+        <p class="section-sub">From Jaipur fashion to refurbished MFD machines — quality products, real support, delivered pan India.</p>
+      </div>
+      <div class="why-stats">
+        <div class="why-stat"><strong>500+</strong><span>Products</span><p>Across all categories</p></div>
+        <div class="why-stat"><strong>28+</strong><span>States</span><p>Pan India delivery</p></div>
+        <div class="why-stat"><strong>100%</strong><span>Genuine</span><p>Tested before dispatch</p></div>
+        <div class="why-stat"><strong>24h</strong><span>Support</span><p>WhatsApp &amp; call</p></div>
+      </div>
+    </div>
+    <div class="why-feats">
+      <div class="why-feat">
+        <div class="why-feat-icon">🚀</div>
+        <div>
+          <div class="why-feat-title">Fast Delivery</div>
+          <div class="why-feat-sub">Tracked shipments across India</div>
+        </div>
+      </div>
+      <div class="why-feat">
+        <div class="why-feat-icon">🛡️</div>
+        <div>
+          <div class="why-feat-title">Warranty</div>
+          <div class="why-feat-sub">On all MFD machines</div>
+        </div>
+      </div>
+      <div class="why-feat">
+        <div class="why-feat-icon">💬</div>
+        <div>
+          <div class="why-feat-title">WhatsApp Support</div>
+          <div class="why-feat-sub">Real people, fast answers</div>
+        </div>
+      </div>
+      <div class="why-feat">
+        <div class="why-feat-icon">📦</div>
+        <div>
+          <div class="why-feat-title">Bulk Orders</div>
+          <div class="why-feat-sub">B2B &amp; corporate friendly</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SOURCE CTA ─────────────────────────────────── -->
+<div class="source-section">
+  <div class="source-inner">
+    <div class="source-left">
+      <h2>WE CAN SOURCE <span>ANYTHING,</span><br>JUST ASK.</h2>
+      <p>HarmaalWale isn't limited to what's listed. From niche electronics to custom bulk orders — if you need it, drop us a message and our team will make it happen.</p>
+      <div class="source-tags">
+        <span class="source-tag">Custom orders</span>
+        <span class="source-tag">Bulk sourcing</span>
+        <span class="source-tag">Rare &amp; niche items</span>
+        <span class="source-tag">Corporate procurement</span>
+      </div>
+    </div>
+    <div class="source-btns">
+      <a class="btn-wa" href="https://wa.me/917891004042?text=Hi%2C%20I%20need%20help%20sourcing%20something" target="_blank">💬 WhatsApp Us</a>
+      <a class="btn-enq" href="mailto:info@harmaalwale.com">📧 Send Enquiry</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="logo">HARMAAL<span>WALE</span></span>
+      <p>Your everyday marketplace — fashion, electronics, essentials and more, all in one place.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="categories.html">IT Products</a></li>
+        <li><a href="fashion.html">Fashion</a></li>
+        <li><a href="seller.html">Sell With Us</a></li>
+        <li><a href="https://wa.me/917891004042">Custom Orders</a></li>
+        <li><a href="categories.html">More Launching Next</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="support.html">Contact Us</a></li>
+        <li><a href="account.html">Track Order</a></li>
+        <li><a href="support.html">Replacement Policy</a></li>
+        <li><a href="support.html#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="support.html">Terms of Service</a></li>
+        <li><a href="seller.html" class="highlight">🏪 Sell on HarmaalWale</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 HarmaalWale. All rights reserved.</p>
+    <p>Made with <span>♥</span> in India</p>
+  </div>
+</footer>
+
+<!-- ── FLOATING WA ────────────────────────────────── -->
+<a class="wa-float" href="https://wa.me/917891004042" target="_blank" title="Chat on WhatsApp">💬</a>
+
+<script>
+  // ── THEME SYSTEM ─────────────────────────────────
+  const html = document.documentElement;
+  const label = document.getElementById('themeLabel');
+
+  // Load saved preference, default = light
+  const saved = localStorage.getItem('hw-theme') || 'light';
+  setTheme(saved);
+
+  function setTheme(t) {
+    html.setAttribute('data-theme', t);
+    label.textContent = t === 'dark' ? 'Dark' : 'Light';
+    localStorage.setItem('hw-theme', t);
+  }
+
+  function toggleTheme() {
+    const current = html.getAttribute('data-theme');
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  }
+</script>
+
+<script src="assets/js/hw.js"></script>
+</body>
+</html>

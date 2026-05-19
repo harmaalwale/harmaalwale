@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>All Categories | HarmaalWale</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+    <link rel="canonical" href="https://harmaalwale.com/categories.html">
+    <meta name="description" content="Browse all categories on HarmaalWale – fashion, refurbished MFDs, MFD spare parts, IT products and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{--orange:#E87000;--orange-light:#FF8C1A;--black:#111;--dark:#1a1a1a;--gray:#2e2e2e;--light:#f7f7f7;--white:#fff;--muted:#888;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Barlow',sans-serif;background:var(--white);color:var(--black);overflow-x:hidden;}
+header{position:sticky;top:0;z-index:100;background:var(--black);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:70px;box-shadow:0 2px 20px rgba(0,0,0,0.4);}
+.logo img{height:44px;display:block;}
+.header-right{display:flex;align-items:center;gap:20px;}
+.header-search{display:flex;align-items:center;background:var(--gray);border-radius:6px;overflow:hidden;border:1px solid #3a3a3a;}
+.header-search input{background:none;border:none;outline:none;padding:9px 16px;color:#fff;font-family:'Barlow',sans-serif;font-size:14px;width:220px;}
+.header-search input::placeholder{color:#666;}
+.search-btn{background:var(--orange);border:none;padding:9px 15px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;}
+.header-icons{display:flex;align-items:center;gap:6px;}
+.icon-btn{background:none;border:none;cursor:pointer;color:#aaa;width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;transition:background 0.2s,color 0.2s;}
+.icon-btn:hover{background:rgba(232,112,0,0.12);color:#E87000;}
+.badge{position:absolute;top:5px;right:5px;background:#E87000;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;padding:0 3px;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.back-home{display:flex;align-items:center;gap:6px;color:#888;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border:1px solid #333;padding:7px 14px;border-radius:5px;transition:all 0.2s;}
+.back-home:hover{border-color:var(--orange);color:var(--orange);}
+.page-hero{background:var(--black);padding:50px 60px;text-align:center;position:relative;overflow:hidden;}
+.page-hero::before{content:'';position:absolute;left:50%;top:-50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(232,112,0,0.1) 0%,transparent 65%);border-radius:50%;}
+.hero-text{position:relative;z-index:2;}
+.hero-tag{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:12px;}
+.hero-title{font-family:'Barlow Condensed',sans-serif;font-size:62px;font-weight:900;text-transform:uppercase;color:#fff;line-height:0.9;margin-bottom:16px;}
+.hero-title span{color:var(--orange);}
+.hero-desc{color:#777;font-size:15px;line-height:1.7;max-width:500px;margin:0 auto;}
+.section{padding:50px 60px 60px;}
+.section-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:8px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:900;text-transform:uppercase;margin-bottom:30px;line-height:1;}
+.section-title span{color:var(--orange);}
+.cats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.cat-card{border-radius:14px;overflow:hidden;border:1px solid #eee;background:#fff;cursor:pointer;transition:all 0.25s;text-decoration:none;color:inherit;display:block;}
+.cat-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,0.1);border-color:#ddd;}
+.cat-card.coming{opacity:0.6;cursor:default;pointer-events:none;}
+.cat-img{height:180px;display:flex;align-items:center;justify-content:center;font-size:72px;background:linear-gradient(135deg,#1a1a1a,#2e2e2e);position:relative;}
+.cat-label-cs{position:absolute;top:12px;right:12px;background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.cat-label-live{position:absolute;top:12px;right:12px;background:#4CAF50;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.cat-body{padding:20px 22px 22px;}
+.cat-body h3{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;margin-bottom:6px;}
+.cat-body p{font-size:13px;color:#888;line-height:1.6;margin-bottom:14px;}
+.cat-arrow{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);display:inline-flex;align-items:center;gap:4px;}
+.source-box{background:var(--black);border-radius:16px;padding:50px 60px;margin:0 60px 60px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.source-text h3{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;text-transform:uppercase;color:#fff;line-height:1;margin-bottom:10px;}
+.source-text h3 span{color:var(--orange);}
+.source-text p{color:#666;font-size:14px;line-height:1.7;max-width:460px;}
+.btn-orange{background:var(--orange);color:#fff;text-decoration:none;padding:14px 32px;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;display:inline-block;transition:all 0.2s;}
+.btn-orange:hover{background:var(--orange-light);}
+.page-footer{background:var(--black);color:#444;padding:24px 60px;display:flex;justify-content:space-between;align-items:center;font-size:12px;border-top:1px solid #1a1a1a;}
+.page-footer a{color:var(--orange);text-decoration:none;}
+@media(max-width:900px){.cats-grid{grid-template-columns:1fr 1fr}.section,.source-box{padding-left:24px;padding-right:24px}.source-box{margin-left:24px;margin-right:24px}}
+@media(max-width:600px){.cats-grid{grid-template-columns:1fr}.hero-title{font-size:42px}header{padding:0 16px}.header-search{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer"><img src="logo.jpg" alt="HarmaalWale"></div>
+  <div class="header-right">
+    <div class="header-search">
+      <input type="text" placeholder="Search products...">
+      <button class="search-btn"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></button>
+    </div>
+    <div class="header-icons">
+      <button class="icon-btn" id="hw-account-btn"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
+      <button class="icon-btn" id="hw-wishlist-btn"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span class="badge" id="hw-wish-badge" style="display:none"></span></button>
+      <button class="icon-btn" id="hw-cart-btn"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="badge" id="hw-cart-badge" style="display:none"></span></button>
+      <a href="support.html" style="color:#888;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border:1px solid #2a2a2a;padding:6px 12px;border-radius:5px" onmouseover="this.style.color='#E87000';this.style.borderColor='#E87000'" onmouseout="this.style.color='#888';this.style.borderColor='#2a2a2a'">Help</a>
+      <a href="index.html" class="back-home">← Home</a>
+    </div>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="hero-text">
+    <div class="hero-tag">● Everything You Need</div>
+    <h1 class="hero-title">All <span>Categories</span></h1>
+    <p class="hero-desc">Browse everything HarmaalWale offers — from fashion and MFDs to IT products and custom sourcing.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">● Available Now</div>
+  <div class="section-title">Shop <span>Today</span></div>
+  <div class="cats-grid">
+    <a href="fashion.html" class="cat-card">
+      <div class="cat-img">👕<span class="cat-label-live">Live</span></div>
+      <div class="cat-body"><h3>Fashion</h3><p>Jaipuri shirts, ethnic wear, casual clothing — handpicked quality, pan-India delivery.</p><div class="cat-arrow">Shop Now →</div></div>
+    </a>
+    <a href="mfd-refurbished.html" class="cat-card">
+      <div class="cat-img">🖨️<span class="cat-label-live">Available</span></div>
+      <div class="cat-body"><h3>Refurbished MFDs</h3><p>Certified refurbished multifunction printers — Ricoh, Canon, Konica Minolta and more.</p><div class="cat-arrow">Enquire Now →</div></div>
+    </a>
+    <a href="mfd-spares.html" class="cat-card">
+      <div class="cat-img">🔧<span class="cat-label-live">Available</span></div>
+      <div class="cat-body"><h3>MFD Spare Parts</h3><p>Drums, fusers, toners, rollers, maintenance kits — genuine and compatible parts.</p><div class="cat-arrow">View Parts →</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="section" style="padding-top:0">
+  <div class="section-label">● Launching Next</div>
+  <div class="section-title">Launching <span>Next</span></div>
+  <div class="cats-grid">
+    <div class="cat-card coming">
+      <div class="cat-img">💻<span class="cat-label-cs">Soon</span></div>
+      <div class="cat-body"><h3>IT Products</h3><p>Laptops, desktops, networking gear, peripherals and accessories. New and refurbished.</p><div class="cat-arrow">Launching Next</div></div>
+    </div>
+    <div class="cat-card coming">
+      <div class="cat-img">🏠<span class="cat-label-cs">Soon</span></div>
+      <div class="cat-body"><h3>Home Essentials</h3><p>Daily use products, home care, kitchen items and more — coming to HarmaalWale.</p><div class="cat-arrow">Launching Next</div></div>
+    </div>
+    <div class="cat-card coming">
+      <div class="cat-img">⚡<span class="cat-label-cs">Soon</span></div>
+      <div class="cat-body"><h3>Electronics</h3><p>Consumer electronics, gadgets, smart devices and accessories at great prices.</p><div class="cat-arrow">Launching Next</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="source-box">
+  <div class="source-text">
+    <h3>Can't Find <span>What You Need?</span></h3>
+    <p>HarmaalWale isn't limited to what's listed here. From niche electronics to bulk orders and hard-to-find items — our team will source it for you.</p>
+  </div>
+  <a href="support.html" class="btn-orange">Ask Us Anything →</a>
+</div>
+
+<div class="page-footer">
+  <span>© 2025 HarmaalWale. All rights reserved.</span>
+  <a href="index.html">← Back to Home</a>
+</div>
+<script src="auth_widget.js"></script>
+</body>
+</html>

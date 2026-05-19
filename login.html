@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login / Register – HarmaalWale</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+    <link rel="canonical" href="https://harmaalwale.com/login.html">
+    <meta name="description" content="Login or register on HarmaalWale to track orders, manage your wishlist and shop seamlessly.">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hw.css">
+  <style>
+    .login-wrap{min-height:calc(100vh - 66px);display:flex;align-items:center;justify-content:center;padding:32px 16px;}
+    .login-box{background:var(--bg-2);border:1.5px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;box-shadow:var(--card-shadow);}
+    .login-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--text);margin-bottom:4px;}
+    .login-title span{color:var(--accent);}
+    .login-sub{font-size:13px;color:var(--text-3);margin-bottom:28px;}
+    .otp-row{display:flex;gap:10px;}
+    .otp-row .form-input{flex:1;}
+    .send-otp-btn{white-space:nowrap;padding:11px 16px;background:var(--bg-3);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text);transition:all .2s;font-family:Barlow,sans-serif;}
+    .send-otp-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .send-otp-btn:disabled{opacity:.5;cursor:not-allowed;}
+    #timer{font-size:12px;color:var(--accent);font-weight:700;text-align:center;margin-top:6px;}
+    .step{display:none;} .step.active{display:block;}
+    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+    .divider span{font-size:12px;color:var(--text-3);}
+    .wa-login{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:var(--bg-3);border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;text-decoration:none;transition:all .2s;}
+    .wa-login:hover{border-color:#25D366;color:#25D366;}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-back" href="index.html">← Back</a>
+  <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label" id="themeLabel">Light</span>
+    </div>
+  </div>
+</nav>
+
+<div class="login-wrap">
+  <div class="login-box">
+    <h1 class="login-title">Login / <span>Register</span></h1>
+    <p class="login-sub">Enter your mobile number to receive a one-time password</p>
+
+    <div id="alertBox"></div>
+
+    <!-- Step 1: Mobile -->
+    <div class="step active" id="step1">
+      <div class="form-group">
+        <label class="form-label">Mobile Number <span>*</span></label>
+        <div class="otp-row">
+          <div style="display:flex;align-items:center;background:var(--bg-3);border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;color:var(--text-3);">+91</div>
+          <input type="tel" id="mobileInput" class="form-input" placeholder="10-digit mobile" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          <button class="send-otp-btn" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
+        </div>
+        <div class="form-hint">We'll send a 6-digit OTP via SMS</div>
+      </div>
+      <div id="timer"></div>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div class="step" id="step2">
+      <div class="form-group">
+        <label class="form-label">OTP sent to +91 <span id="maskedMobile"></span></label>
+        <input type="text" id="otpInput" class="form-input" placeholder="Enter 6-digit OTP" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        <div class="form-hint"><a href="#" onclick="goBack()" style="color:var(--accent)">Change number</a> · <a href="#" onclick="sendOTP(true)" style="color:var(--accent)">Resend OTP</a></div>
+      </div>
+      <button class="btn btn-primary btn-block" id="verifyBtn" onclick="verifyOTP()">Verify & Login</button>
+    </div>
+
+    <!-- Step 3: Name (new users) -->
+    <div class="step" id="step3">
+      <div class="form-group">
+        <label class="form-label">Your Full Name <span>*</span></label>
+        <input type="text" id="nameInput" class="form-input" placeholder="Enter your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address <span style="color:var(--text-3)">(optional)</span></label>
+        <input type="email" id="emailInput" class="form-input" placeholder="you@example.com">
+        <div class="form-hint">For order confirmations and receipts</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="completeRegistration()">Create Account →</button>
+    </div>
+
+    <div class="divider"><span>or</span></div>
+    <a class="wa-login" href="https://wa.me/917891004042?text=Hi%2C%20I%20need%20help%20with%20my%20account" target="_blank">💬 Get help via WhatsApp</a>
+  </div>
+</div>
+
+<script>
+  const API = '/api/auth.php';
+  let currentMobile = '';
+  let otpTimer = null;
+
+  // Theme
+  const html = document.documentElement, lbl = document.getElementById('themeLabel');
+  const saved = localStorage.getItem('hw-theme') || 'light';
+  setTheme(saved);
+  function setTheme(t){html.setAttribute('data-theme',t);lbl.textContent=t==='dark'?'Dark':'Light';localStorage.setItem('hw-theme',t);}
+  function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
+
+  // Check already logged in
+  if (localStorage.getItem('hw_token')) {
+    window.location.href = 'account.html';
+  }
+
+  function showAlert(msg, type='error') {
+    const box = document.getElementById('alertBox');
+    box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    setTimeout(() => box.innerHTML = '', 5000);
+  }
+
+  function showStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+  }
+
+  function goBack() { showStep(1); }
+
+  async function sendOTP(isResend = false) {
+    const mobile = document.getElementById('mobileInput').value.trim();
+    if (mobile.length !== 10) { showAlert('Enter a valid 10-digit mobile number'); return; }
+    currentMobile = mobile;
+    const btn = document.getElementById('sendOtpBtn');
+    btn.disabled = true; btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch(API + '?action=send_otp', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mobile })
+      });
+      const data = await res.json();
+      if (!data.success) { showAlert(data.error || 'Failed to send OTP'); btn.disabled=false; btn.textContent='Send OTP'; return; }
+      document.getElementById('maskedMobile').textContent = mobile.substring(0,2) + 'XXXXXX' + mobile.substring(8);
+      showStep(2);
+      showAlert('OTP sent successfully!', 'success');
+      startTimer(data.expires_in || 600);
+    } catch(e) { showAlert('Network error. Try again.'); btn.disabled=false; btn.textContent='Send OTP'; }
+  }
+
+  function startTimer(seconds) {
+    clearInterval(otpTimer);
+    const el = document.getElementById('timer');
+    let s = seconds;
+    otpTimer = setInterval(() => {
+      s--;
+      if (s <= 0) { clearInterval(otpTimer); el.textContent = ''; return; }
+      const m = Math.floor(s/60), sec = s%60;
+      el.textContent = `OTP expires in ${m}:${sec.toString().padStart(2,'0')}`;
+    }, 1000);
+  }
+
+  async function verifyOTP() {
+    const otp = document.getElementById('otpInput').value.trim();
+    if (otp.length !== 6) { showAlert('Enter the 6-digit OTP'); return; }
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled=true; btn.textContent='Verifying...';
+
+    try {
+      const res = await fetch(API + '?action=verify_otp', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mobile: currentMobile, otp })
+      });
+      const data = await res.json();
+      if (data.needs_name) { showStep(3); btn.disabled=false; btn.textContent='Verify & Login'; return; }
+      if (!data.success) { showAlert(data.error || 'Invalid OTP'); btn.disabled=false; btn.textContent='Verify & Login'; return; }
+      loginSuccess(data);
+    } catch(e) { showAlert('Network error. Try again.'); btn.disabled=false; btn.textContent='Verify & Login'; }
+  }
+
+  async function completeRegistration() {
+    const name = document.getElementById('nameInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
+    if (!name) { showAlert('Please enter your name'); return; }
+    const otp = document.getElementById('otpInput').value.trim();
+
+    try {
+      const res = await fetch(API + '?action=verify_otp', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mobile: currentMobile, otp, name, email })
+      });
+      const data = await res.json();
+      if (!data.success) { showAlert(data.error || 'Error creating account'); return; }
+      loginSuccess(data);
+    } catch(e) { showAlert('Network error. Try again.'); }
+  }
+
+  function loginSuccess(data) {
+    localStorage.setItem('hw_token', data.token);
+    localStorage.setItem('hw_user', JSON.stringify(data.user));
+    showAlert('Welcome to HarmaalWale! Redirecting...', 'success');
+    const redirect = new URLSearchParams(window.location.search).get('redirect') || 'account.html';
+    setTimeout(() => window.location.href = redirect, 1200);
+  }
+</script>
+</body>
+</html>

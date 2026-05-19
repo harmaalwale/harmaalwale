@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+  <rect width="300" height="200" fill="#1a1a1a"/>
+  <rect x="10" y="10" width="280" height="180" fill="none" stroke="#FF6B00" stroke-width="1" stroke-dasharray="4"/>
+  <text x="150" y="90" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">MFD Part</text>
+  <text x="150" y="110" font-family="Arial" font-size="10" fill="#666" text-anchor="middle">Image</text>
+</svg>

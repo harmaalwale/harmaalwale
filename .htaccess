@@ -1,0 +1,13 @@
+# HarmaalWale v3 — .htaccess
+# Security Headers
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+# Hide server version
+ServerSignature Off
+
+# Performance: cache static assets
+<FilesMatch "\.(jpg|jpeg|png|gif|svg|css|js|woff2?)$">
+  Header set Cache-Control "max-age=2592000, public"
+</FilesMatch>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Support – HarmaalWale</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+    <link rel="canonical" href="https://harmaalwale.com/support.html">
+    <meta name="description" content="Contact HarmaalWale customer support. WhatsApp, email, track orders and get help with replacements or queries.">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hw.css">
+  <style>
+    .support-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:40px;align-items:start;}
+    .contact-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+    .contact-card{background:var(--bg-2);border:1.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:all .2s;text-decoration:none;display:block;}
+    .contact-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+    .contact-card .icon{font-size:32px;margin-bottom:10px;}
+    .contact-card h3{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;}
+    .contact-card p{font-size:11px;color:var(--text-3);}
+    .faq-item{background:var(--bg-2);border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:border-color .2s;}
+    .faq-item.open{border-color:var(--accent);}
+    .faq-q{padding:16px 18px;font-weight:700;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:var(--text);user-select:none;}
+    .faq-q:hover{color:var(--accent);}
+    .faq-item.open .faq-q{color:var(--accent);}
+    .faq-a{padding:0 18px 16px;font-size:13px;color:var(--text-3);line-height:1.6;display:none;}
+    .faq-item.open .faq-a{display:block;}
+    .form-box{background:var(--bg-2);border:1.5px solid var(--border);border-radius:16px;padding:32px;}
+    .success-box{text-align:center;padding:48px 24px;}
+    .success-box .icon{font-size:56px;margin-bottom:16px;}
+    .success-box h3{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--text);}
+    .success-box p{color:var(--text-3);font-size:14px;margin-top:8px;}
+    @media(max-width:768px){.support-grid{grid-template-columns:1fr;}.contact-cards{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-back" href="index.html">← Back</a>
+  <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label" id="themeLabel">Light</span>
+    </div>
+    <a class="nav-wa-btn" href="https://wa.me/917891004042" target="_blank">WhatsApp</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div style="max-width:800px;margin:0 auto;text-align:center">
+    <div class="section-title">🎧 CUSTOMER <span>SUPPORT</span></div>
+    <p class="section-sub" style="margin-top:10px">We're here for you — product queries, order help, or anything else. Real people, fast answers.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="support-grid">
+    <!-- Left: contact options + FAQ -->
+    <div>
+      <div class="contact-cards">
+        <a class="contact-card" href="https://wa.me/917891004042" target="_blank">
+          <div class="icon">💬</div><h3>WhatsApp</h3><p>+91 78910 04042<br>Fastest response</p>
+        </a>
+        <a class="contact-card" href="mailto:support@harmaalwale.com">
+          <div class="icon">📧</div><h3>Email</h3><p>support@harmaalwale.com<br>Reply in 24h</p>
+        </a>
+        <a class="contact-card" href="https://wa.me/917891004042?text=Track%20my%20order" target="_blank">
+          <div class="icon">📦</div><h3>Track Order</h3><p>WhatsApp us your order ID</p>
+        </a>
+        <a class="contact-card" href="https://wa.me/917891004042?text=I%20need%20a%20replacement" target="_blank">
+          <div class="icon">🔄</div><h3>Replacement</h3><p>Within 48hrs of delivery</p>
+        </a>
+      </div>
+
+      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:14px;">Frequently Asked Questions</h3>
+      <div id="faqList">
+        <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Do you deliver across India? <span>+</span></div><div class="faq-a">Yes! We deliver pan India. Typically 3–7 business days depending on location.</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Are MFD spare parts genuine? <span>+</span></div><div class="faq-a">We stock OEM-genuine and high-quality compatible parts. Each listing mentions origin (Japan, China, Thailand) and part number.</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Do refurbished MFDs come with warranty? <span>+</span></div><div class="faq-a">Yes, all refurbished machines come with warranty. Duration varies by model — contact us for specifics.</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I place bulk or corporate orders? <span>+</span></div><div class="faq-a">Absolutely. We're B2B friendly with special bulk pricing. WhatsApp us your requirements for a quote.</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What payment methods do you accept? <span>+</span></div><div class="faq-a">UPI, Razorpay, PayU, bank transfer, and cash on delivery for select locations.</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can you source a part not listed? <span>+</span></div><div class="faq-a">Yes! Send us the part number or machine model on WhatsApp and we'll check availability and pricing.</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How do I return a product? <span>+</span></div><div class="faq-a">Contact us within 48 hours of delivery via WhatsApp or email with photos of the issue. We'll arrange a replacement or refund.</div></div>
+      </div>
+    </div>
+
+    <!-- Right: contact form -->
+    <div>
+      <div class="form-box" id="formBox">
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px;">Send Us a Message</h2>
+        <p style="font-size:13px;color:var(--text-3);margin-bottom:24px;">We'll reply to support@harmaalwale.com within 24 hours</p>
+        <div id="alertBox"></div>
+
+        <div class="form-group">
+          <label class="form-label">Your Name <span>*</span></label>
+          <input type="text" id="sName" class="form-input" placeholder="Full name">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="sEmail" class="form-input" placeholder="you@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile</label>
+            <input type="tel" id="sMobile" class="form-input" placeholder="10-digit mobile">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="sType" class="form-select">
+            <option value="support">General Support</option>
+            <option value="product">Product Enquiry</option>
+            <option value="order">Order Issue</option>
+            <option value="seller">Seller Enquiry</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <input type="text" id="sSubject" class="form-input" placeholder="Brief subject">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message <span>*</span></label>
+          <textarea id="sMessage" class="form-input" rows="5" placeholder="Describe your query in detail..." style="resize:vertical"></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" id="submitBtn" onclick="submitForm()">Send Message →</button>
+      </div>
+
+      <div id="successBox" style="display:none" class="form-box success-box">
+        <div class="icon">✅</div>
+        <h3>Message Sent!</h3>
+        <p>We've received your message and will reply within 24 hours.<br>Check your email for a confirmation.</p>
+        <a href="index.html" class="btn btn-primary" style="margin-top:20px">Back to Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a class="wa-float" href="https://wa.me/917891004042" target="_blank">💬</a>
+
+<script>
+  const html=document.documentElement,lbl=document.getElementById('themeLabel');
+  const saved=localStorage.getItem('hw-theme')||'light';
+  setTheme(saved);
+  function setTheme(t){html.setAttribute('data-theme',t);lbl.textContent=t==='dark'?'Dark':'Light';localStorage.setItem('hw-theme',t);}
+  function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
+
+  function toggleFaq(el){
+    const item=el.parentElement;
+    item.classList.toggle('open');
+    el.querySelector('span').textContent=item.classList.contains('open')?'−':'+';
+  }
+
+  function showAlert(msg, type='error'){
+    document.getElementById('alertBox').innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+  }
+
+  async function submitForm(){
+    const name=document.getElementById('sName').value.trim();
+    const message=document.getElementById('sMessage').value.trim();
+    if(!name||!message){showAlert('Please fill in your name and message');return;}
+    const btn=document.getElementById('submitBtn');
+    btn.disabled=true;btn.textContent='Sending...';
+
+    try{
+      const res=await fetch('api/support.php',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          name,email:document.getElementById('sEmail').value.trim(),
+          mobile:document.getElementById('sMobile').value.trim(),
+          subject:document.getElementById('sSubject').value.trim()||'General Enquiry',
+          message,type:document.getElementById('sType').value
+        })
+      });
+      const data=await res.json();
+      if(!data.success){showAlert(data.error||'Failed to send. Try WhatsApp instead.');btn.disabled=false;btn.textContent='Send Message →';return;}
+      document.getElementById('formBox').style.display='none';
+      document.getElementById('successBox').style.display='block';
+    }catch(e){showAlert('Network error. Please try WhatsApp instead.');btn.disabled=false;btn.textContent='Send Message →';}
+  }
+</script>
+</body>
+</html>
