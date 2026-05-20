@@ -1,202 +1,158 @@
 <?php
-// ============================================================
-//  HarmaalWale — Seller API
-//  POST /api/seller.php?action=apply          → submit application
-//  GET  /api/seller.php?action=status         → check application status
-//  GET  /api/seller.php?action=applications   [admin] → all applications
-//  POST /api/seller.php?action=approve        [admin] → approve seller
-//  POST /api/seller.php?action=reject         [admin] → reject seller
-//  GET  /api/seller.php?action=products       → seller's own products
-//  POST /api/seller.php?action=add_product    → add product (approved sellers)
-// ============================================================
-error_reporting(0);
-ini_set('display_errors', 0);
+require_once 'config.php';
 require_once 'db.php';
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
-$action = $_GET['action'] ?? getBody()['action'] ?? '';
-$method = $_SERVER['REQUEST_METHOD'];
-
-function genRef() {
-    return 'HWS-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 7));
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
 }
 
-// ── Submit Seller Application (public — no auth required) ────
-if ($method === 'POST' && $action === 'apply') {
-    $b = getBody();
+$input = json_decode(file_get_contents('php://input'), true);
 
-    foreach (['name','biz_name','email','phone','city','state','biz_type','categories'] as $f) {
-        if (empty($b[$f])) jsonResponse(['error' => "Missing required field: $f"], 400);
+$name = trim($input['name'] ?? '');
+$businessName = trim($input['business_name'] ?? '');
+$gstNumber = strtoupper(trim($input['gst_number'] ?? ''));
+$pan = strtoupper(trim($input['pan'] ?? ''));
+$email = trim($input['email'] ?? '');
+$phone = trim($input['phone'] ?? '');
+$category = trim($input['category'] ?? '');
+$address = trim($input['address'] ?? '');
+
+if (empty($name) || empty($businessName) || empty($email) || empty($phone) || empty($category) || empty($address)) {
+    echo json_encode(['success' => false, 'error' => 'All fields are required']);
+    exit;
+}
+
+// ITEM #13 - GST Verification
+$gstVerified = false;
+$gstStatus = 'pending'; // pending, verified, special_case
+
+if (!empty($gstNumber)) {
+    // Validate GST format
+    if (!preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/', $gstNumber)) {
+        echo json_encode(['success' => false, 'error' => 'Invalid GST number format']);
+        exit;
     }
+    
+    // Try to verify GST via free API (ITEM #13)
+    $gstVerified = verifyGSTOnline($gstNumber);
+    $gstStatus = $gstVerified ? 'verified' : 'pending';
+} else {
+    // No GST - create special case for admin approval (ITEM #13)
+    $gstStatus = 'special_case';
+}
 
-    if (!filter_var($b['email'], FILTER_VALIDATE_EMAIL)) {
-        jsonResponse(['error' => 'Invalid email address'], 400);
+try {
+    $pdo = getDB();
+    
+    // Generate Case ID
+    $caseId = 'SELLER' . date('Ymd') . rand(1000, 9999);
+    
+    // Insert seller request
+    $stmt = $pdo->prepare("INSERT INTO seller_requests 
+                           (case_id, name, business_name, gst_number, pan, email, phone, category, address, gst_verified, gst_status, status, created_at) 
+                           VALUES (:case_id, :name, :business_name, :gst_number, :pan, :email, :phone, :category, :address, :gst_verified, :gst_status, 'pending', NOW())");
+    $stmt->execute([
+        ':case_id' => $caseId,
+        ':name' => $name,
+        ':business_name' => $businessName,
+        ':gst_number' => $gstNumber,
+        ':pan' => $pan,
+        ':email' => $email,
+        ':phone' => $phone,
+        ':category' => $category,
+        ':address' => $address,
+        ':gst_verified' => $gstVerified ? 1 : 0,
+        ':gst_status' => $gstStatus
+    ]);
+    
+    // Send email to support@harmaalwale.com (ITEM #7)
+    $supportEmail = MAIL_SUPPORT;
+    $supportSubject = "New Seller Application: $caseId";
+    $supportBody = "
+    <html>
+    <body>
+        <h2>New Seller Registration</h2>
+        <p><strong>Case ID:</strong> $caseId</p>
+        <p><strong>Name:</strong> $name</p>
+        <p><strong>Business Name:</strong> $businessName</p>
+        <p><strong>GST Number:</strong> " . ($gstNumber ?: 'Not Provided') . "</p>
+        <p><strong>GST Status:</strong> " . ($gstStatus === 'verified' ? '✓ Verified Online' : ($gstStatus === 'special_case' ? '⚠ Special Case - Manual Approval Required' : '⏳ Pending Verification')) . "</p>
+        <p><strong>PAN:</strong> $pan</p>
+        <p><strong>Email:</strong> $email</p>
+        <p><strong>Phone:</strong> $phone</p>
+        <p><strong>Category:</strong> $category</p>
+        <p><strong>Address:</strong> $address</p>
+        <hr>
+        <p><strong>Action Required:</strong> " . ($gstStatus === 'verified' ? 'Review and approve seller application' : 'Manual verification required') . "</p>
+        <p><em>Submitted on: " . date('Y-m-d H:i:s') . "</em></p>
+    </body>
+    </html>
+    ";
+    
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $headers .= "From: " . MAIL_FROM_NAME . " <" . MAIL_FROM . ">\r\n";
+    
+    mail($supportEmail, $supportSubject, $supportBody, $headers);
+    
+    // Send confirmation to seller
+    $sellerSubject = "Seller Application Received: $caseId";
+    $sellerBody = "
+    <html>
+    <body>
+        <h2>Thank you for applying to sell on HarmaalWale!</h2>
+        <p>Dear $name,</p>
+        <p>We have received your seller application.</p>
+        <p><strong>Application ID:</strong> $caseId</p>
+        <p><strong>Business:</strong> $businessName</p>
+        <p><strong>GST Verification:</strong> " . ($gstStatus === 'verified' ? '✓ Verified' : ($gstStatus === 'special_case' ? 'Manual verification required' : 'Under review')) . "</p>
+        <hr>
+        <p>Our team will review your application and contact you within 48 hours.</p>
+        <br>
+        <p>Best regards,<br>Team HarmaalWale</p>
+    </body>
+    </html>
+    ";
+    
+    mail($email, $sellerSubject, $sellerBody, $headers);
+    
+    echo json_encode([
+        'success' => true,
+        'case_id' => $caseId,
+        'gst_verified' => $gstVerified,
+        'gst_status' => $gstStatus,
+        'message' => 'Seller application submitted successfully'
+    ]);
+    
+} catch (PDOException $e) {
+    error_log("Seller Error: " . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'Database error']);
+}
+
+// GST Verification Function (ITEM #13)
+function verifyGSTOnline($gstNumber) {
+    // Using free GST verification API
+    $url = "https://sheet.gst.gov.in/registration/auth/api/get/gstnbypan?pan=" . substr($gstNumber, 2, 10);
+    
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode === 200 && !empty($response)) {
+        $data = json_decode($response, true);
+        if (isset($data['status']) && $data['status'] === 'success') {
+            return true;
+        }
     }
-
-    $db  = getDB();
-    $ref = genRef();
-
-    // Check duplicate
-    $chk = $db->prepare("SELECT id FROM seller_applications WHERE email=? OR phone=?");
-    $chk->bind_param('ss', $b['email'], $b['phone']);
-    $chk->execute();
-    if ($chk->get_result()->num_rows > 0) {
-        $db->close();
-        jsonResponse(['error' => 'An application with this email or phone already exists. Contact support@harmaalwale.com if you need help.'], 400);
-    }
-
-    $stmt = $db->prepare(
-        "INSERT INTO seller_applications
-         (ref_code,name,biz_name,email,phone,city,state,gst,pan,address,biz_type,categories,description,website,instagram)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-    );
-    $stmt->bind_param('sssssssssssssss',
-        $ref, $b['name'], $b['biz_name'], $b['email'], $b['phone'],
-        $b['city'], $b['state'],
-        ($b['gst']??''), ($b['pan']??''), ($b['address']??''),
-        $b['biz_type'], $b['categories'], ($b['description']??''),
-        ($b['website']??''), ($b['instagram']??'')
-    );
-    $stmt->execute();
-    $appId = $db->insert_id;
-    $db->close();
-
-    // Email to admin
-    $adminBody = emailTemplate("New Seller Application — $ref",
-        "<p>A new seller has applied to join HarmaalWale.</p>
-         <table style='width:100%;border-collapse:collapse'>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700;width:140px'>Ref</td><td style='padding:8px;border-bottom:1px solid #eee'>$ref</td></tr>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Name</td><td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($b['name']) . "</td></tr>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Business</td><td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($b['biz_name']) . "</td></tr>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Email</td><td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($b['email']) . "</td></tr>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Phone</td><td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($b['phone']) . "</td></tr>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>City/State</td><td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($b['city'] . ', ' . $b['state']) . "</td></tr>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Business Type</td><td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($b['biz_type']) . "</td></tr>
-           <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Categories</td><td style='padding:8px'>" . htmlspecialchars($b['categories']) . "</td></tr>
-         </table>
-         <a href='" . SITE_URL . "/admin.html' class='btn'>Review in Admin →</a>"
-    );
-    sendEmail(MAIL_SUPPORT, "New Seller Application — $ref", $adminBody);
-
-    // Confirmation to seller
-    $sellerBody = emailTemplate('Seller Application Received',
-        "<p>Hi <strong>" . htmlspecialchars($b['name']) . "</strong>,</p>
-         <p>Thank you for applying to sell on HarmaalWale! We've received your application and our team will review it within <strong>48 hours</strong>.</p>
-         <p><strong>Application Reference:</strong> $ref<br>Keep this for your records.</p>
-         <p>We'll email you at <strong>" . htmlspecialchars($b['email']) . "</strong> once we've reviewed your application.</p>
-         <p>Questions? Contact us at <a href='mailto:support@harmaalwale.com' style='color:#E87000'>support@harmaalwale.com</a></p>"
-    );
-    sendEmail($b['email'], "Seller Application Received — HarmaalWale ($ref)", $sellerBody);
-
-    jsonResponse(['success' => true, 'ref_code' => $ref, 'message' => 'Application submitted! We\'ll review within 48 hours and email you.']);
+    
+    return false; // If API fails, mark as pending for manual verification
 }
-
-// ── Check application status (by email + ref) ────────────────
-if ($method === 'GET' && $action === 'status') {
-    $email = trim($_GET['email'] ?? '');
-    $ref   = trim($_GET['ref']   ?? '');
-    if (!$email && !$ref) jsonResponse(['error' => 'Provide email or ref_code'], 400);
-
-    $db = getDB();
-    if ($ref) {
-        $stmt = $db->prepare("SELECT ref_code,biz_name,name,status,submitted_at,admin_notes FROM seller_applications WHERE ref_code=?");
-        $stmt->bind_param('s', $ref);
-    } else {
-        $stmt = $db->prepare("SELECT ref_code,biz_name,name,status,submitted_at,admin_notes FROM seller_applications WHERE email=? ORDER BY id DESC LIMIT 1");
-        $stmt->bind_param('s', $email);
-    }
-    $stmt->execute();
-    $app = $stmt->get_result()->fetch_assoc();
-    $db->close();
-
-    if (!$app) jsonResponse(['error' => 'Application not found'], 404);
-    jsonResponse(['success' => true, 'application' => $app]);
-}
-
-// ── Admin: list all applications ─────────────────────────────
-if ($method === 'GET' && $action === 'applications') {
-    requireAdmin();
-    $db     = getDB();
-    $status = $_GET['status'] ?? '';
-    if ($status) {
-        $stmt = $db->prepare("SELECT * FROM seller_applications WHERE status=? ORDER BY submitted_at DESC");
-        $stmt->bind_param('s', $status);
-    } else {
-        $stmt = $db->prepare("SELECT * FROM seller_applications ORDER BY submitted_at DESC");
-    }
-    $stmt->execute();
-    $apps = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $db->close();
-    jsonResponse(['success' => true, 'applications' => $apps, 'count' => count($apps)]);
-}
-
-// ── Admin: approve seller ─────────────────────────────────────
-if ($method === 'POST' && $action === 'approve') {
-    requireAdmin();
-    $b   = getBody();
-    $id  = intval($b['id'] ?? 0);
-    $db  = getDB();
-
-    $stmt = $db->prepare("SELECT * FROM seller_applications WHERE id=?");
-    $stmt->bind_param('i', $id); $stmt->execute();
-    $app = $stmt->get_result()->fetch_assoc();
-    if (!$app) { $db->close(); jsonResponse(['error' => 'Not found'], 404); }
-
-    $db->prepare("UPDATE seller_applications SET status='approved', reviewed_at=NOW(), admin_notes=? WHERE id=?")
-       ->execute([($b['notes']??''), $id]);
-
-    // Add to sellers table
-    $s = $db->prepare("INSERT IGNORE INTO sellers (application_id,biz_name,email,phone,city,gst) VALUES (?,?,?,?,?,?)");
-    $s->bind_param('isssss', $id, $app['biz_name'], $app['email'], $app['phone'], $app['city'], ($app['gst']??''));
-    $s->execute();
-    $db->close();
-
-    // Email seller
-    $body = emailTemplate('🎉 Your Seller Application is Approved!',
-        "<p>Hi <strong>" . htmlspecialchars($app['name']) . "</strong>,</p>
-         <p>Congratulations! Your application to sell on HarmaalWale has been <strong style='color:#16a34a'>approved</strong>.</p>
-         <p>Your business <strong>" . htmlspecialchars($app['biz_name']) . "</strong> is now a verified seller on HarmaalWale.</p>
-         <p>You can now log in and start listing your products:</p>
-         <a href='" . SITE_URL . "/seller.html' class='btn'>Go to Seller Dashboard →</a>
-         <p>Welcome to the HarmaalWale family! 🎊</p>"
-    );
-    sendEmail($app['email'], '🎉 Seller Application Approved — HarmaalWale', $body);
-
-    jsonResponse(['success' => true, 'message' => 'Seller approved and notified']);
-}
-
-// ── Admin: reject ─────────────────────────────────────────────
-if ($method === 'POST' && $action === 'reject') {
-    requireAdmin();
-    $b  = getBody();
-    $id = intval($b['id'] ?? 0);
-    $db = getDB();
-
-    $stmt = $db->prepare("SELECT * FROM seller_applications WHERE id=?");
-    $stmt->bind_param('i', $id); $stmt->execute();
-    $app = $stmt->get_result()->fetch_assoc();
-
-    $db->prepare("UPDATE seller_applications SET status='rejected', reviewed_at=NOW(), admin_notes=? WHERE id=?")
-       ->execute([($b['reason']??''), $id]);
-    $db->close();
-
-    $reason = $b['reason'] ?? 'Your application did not meet our current requirements.';
-    $body = emailTemplate('Seller Application Update',
-        "<p>Hi <strong>" . htmlspecialchars($app['name']) . "</strong>,</p>
-         <p>Thank you for your interest in selling on HarmaalWale.</p>
-         <p>After reviewing your application, we're unable to approve it at this time.</p>
-         <p><strong>Reason:</strong> " . htmlspecialchars($reason) . "</p>
-         <p>You're welcome to apply again in the future or contact us for more information.</p>
-         <a href='mailto:support@harmaalwale.com' class='btn'>Contact Support</a>"
-    );
-    sendEmail($app['email'], 'Seller Application Update — HarmaalWale', $body);
-
-    jsonResponse(['success' => true, 'message' => 'Application rejected and seller notified']);
-}
-
-jsonResponse(['error' => 'Unknown action'], 400);
+?>

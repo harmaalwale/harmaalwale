@@ -1,98 +1,48 @@
 @echo off
 setlocal enabledelayedexpansion
-
-for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c-%%a-%%b)
-for /f "tokens=1-2 delims=/:" %%a in ('time /t') do (set mytime=%%a%%b)
-
-set LOCAL_FOLDER=D:\Working Data\harmaalwale_v3
-set CPANEL_HOST=harmaalwale.com
-set CPANEL_USER=harmakko
-set CPANEL_PORT=2222
-set REMOTE_FOLDER=/home/harmakko/public_html
-set SSH_KEY=%USERPROFILE%\.ssh\id_rsa
-
-cd /d "%LOCAL_FOLDER%"
-
-cls
+ 
+echo ╔════════════════════════════════════════════════════════╗
+echo ║         HarmaalWale - Force Refresh v2.0               ║
+echo ╚════════════════════════════════════════════════════════╝
 echo.
-echo ============================================================
-echo HARMAALWALE - COMPLETE REFRESH (ALL FILES + CACHE CLEAR)
-echo Time: %mydate% %mytime%
-echo ============================================================
-echo.
-
-echo [STEP 1] Git operations
-echo.
-git pull origin main 2>nul
-git add -A
-git commit -m "Refresh %mydate% %mytime%" 2>nul
-git push -f origin main 2>nul
-echo [OK] GitHub synced
-
-echo.
-echo [STEP 2] Uploading ALL files (complete refresh)
-echo.
-
-REM Upload all HTML files
-for /r %%f in (*.html) do (
-    echo - %%~nf
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/%%~nf 2>nul
+ 
+set host=harmakko@harmaalwale.com
+set port=2222
+set remote=/public_html/
+ 
+echo [1/4] Uploading ALL HTML files...
+set /a html_count=0
+for /r . %%f in (*.html) do (
+  set "filepath=%%f"
+  set "filepath=!filepath:%CD%\=!"
+  if not "!filepath!"=="node_modules*" (
+    set /a html_count+=1
+    scp -P %port% -q "%%f" "%host%:%remote%!filepath!" 2>nul && echo ├─ !filepath!
+  )
 )
-
-REM Upload all PHP files in api/
+echo ✓ Uploaded !html_count! HTML files
+ 
+echo.
+echo [2/4] Uploading ALL PHP files...
+set /a php_count=0
 for /r api %%f in (*.php) do (
-    echo - api/%%~nf
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/api/%%~nf 2>nul
+  set /a php_count+=1
+  scp -P %port% -q "%%f" "%host%:%remote%api/" 2>nul && echo ├─ %%~nxf
 )
-
-REM Upload CSS files
-for /r assets\css %%f in (*.css) do (
-    echo - assets/css/%%~nf
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/assets/css/%%~nf 2>nul
-)
-
-REM Upload JS files
-for /r assets\js %%f in (*.js) do (
-    echo - assets/js/%%~nf
-    scp -P %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no "%%f" %CPANEL_USER%@%CPANEL_HOST%:%REMOTE_FOLDER%/assets/js/%%~nf 2>nul
-)
-
-echo [OK] All files uploaded
-
+echo ✓ Uploaded !php_count! PHP files
+ 
 echo.
-echo [STEP 3] Clearing server cache
+echo [3/4] Uploading assets...
+xcopy /E /I /Y assets temp_assets >nul
+scp -P %port% -rq temp_assets/* "%host%:%remote%assets/" 2>nul && echo ✓ Assets synced
+rmdir /S /Q temp_assets
+ 
 echo.
-ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% ^
-  "rm -rf /home/harmakko/public_html/.cache 2>/dev/null; ^
-   rm -rf /tmp/php* 2>/dev/null; ^
-   find /home/harmakko/public_html -name '*.cache' -delete 2>/dev/null; ^
-   echo 'Cache cleared'"
-
-echo [OK] Cache cleared
-
+echo [4/4] Clearing cache + permissions...
+ssh -p %port% "%host%" "find /public_html -name '.cache' -delete; chmod -R 755 /public_html; chmod 644 /public_html/*.html /public_html/*.php" 2>nul && echo ✓ Done
+ 
 echo.
-echo [STEP 4] Setting permissions
-echo.
-ssh -p %CPANEL_PORT% -i "%SSH_KEY%" -o StrictHostKeyChecking=no %CPANEL_USER%@%CPANEL_HOST% ^
-  "find /home/harmakko/public_html -type d -exec chmod 755 {} \; 2>/dev/null; ^
-   find /home/harmakko/public_html -type f -exec chmod 644 {} \; 2>/dev/null; ^
-   echo 'Permissions set'"
-
-echo [OK] Permissions set
-
-echo.
-echo ============================================================
-echo COMPLETE REFRESH DONE
-echo ============================================================
-echo.
-echo All files uploaded
-echo Cache cleared
-echo Permissions set
-echo.
-echo Browser: Hard refresh (Ctrl+Shift+Delete) then visit site
-echo.
-
-:ASK
-set /p INPUT="Type 'x' to close: "
-if /i "%INPUT%"=="x" exit
-goto ASK
+echo ╔════════════════════════════════════════════════════════╗
+echo ║            ✓ Refresh Complete!                         ║
+echo ╚════════════════════════════════════════════════════════╝
+pause

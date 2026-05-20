@@ -1,83 +1,210 @@
 <?php
 // ============================================================
-//  HarmaalWale — Support / Contact Form API
-//  POST /api/support.php  → saves enquiry + emails support@harmaalwale.com
+// HarmaalWale Support Ticket System (api/support.php)
 // ============================================================
-error_reporting(0);
-ini_set('display_errors', 0);
-require_once 'db.php';
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonResponse(['error' => 'Method not allowed'], 405);
+require_once 'config.php';
+require_once 'db.php';
 
-$b       = getBody();
-$name    = trim($b['name']    ?? '');
-$email   = trim($b['email']   ?? '');
-$mobile  = trim($b['mobile']  ?? '');
-$subject = trim($b['subject'] ?? 'General Enquiry');
-$message = trim($b['message'] ?? '');
-$type    = $b['type'] ?? 'support';
+// Create support table if not exists
+$pdo->exec("CREATE TABLE IF NOT EXISTS support_tickets (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    case_id VARCHAR(20) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    message LONGTEXT NOT NULL,
+    status ENUM('open', 'in-progress', 'resolved') DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
 
-if (!$name || !$message) {
-    jsonResponse(['error' => 'Name and message are required'], 400);
+if($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $category = trim($_POST['category'] ?? 'general');
+    $message = trim($_POST['message'] ?? '');
+    
+    // Validation
+    if(!$name || !$email || !$phone || !$message) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error' => 'All fields are required'
+        ]);
+        exit;
+    }
+    
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Invalid email address'
+        ]);
+        exit;
+    }
+    
+    // Generate unique Case ID
+    $caseId = 'CASE-' . strtoupper(substr(md5(time() . rand()), 0, 8));
+    
+    try {
+        // Insert into database
+        $stmt = $pdo->prepare("
+            INSERT INTO support_tickets (case_id, name, email, phone, category, message, status) 
+            VALUES (?, ?, ?, ?, ?, ?, 'open')
+        ");
+        
+        $stmt->execute([
+            $caseId,
+            $name,
+            $email,
+            $phone,
+            $category,
+            $message
+        ]);
+        
+        // Category-specific response messages
+        $categoryMessages = [
+            'technical' => 'Our technical team will review your issue and contact you within 24 hours.',
+            'orders' => 'Our order team will review your concern and respond within 12 hours.',
+            'returns' => 'Our returns team will process your request and contact you shortly.',
+            'billing' => 'Our billing team will review your concern immediately.',
+            'general' => 'Thank you for reaching out. Our team will get back to you soon.'
+        ];
+        
+        $responseMessage = $categoryMessages[$category] ?? $categoryMessages['general'];
+        
+        // ========== Send Email to Customer ==========
+        $customerSubject = "HarmaalWale Support - Case ID: $caseId";
+        
+        $customerEmailBody = "
+Hello $name,
+
+Thank you for contacting HarmaalWale!
+
+Your Support Case Details:
+========================================
+Case ID: $caseId
+Category: " . ucfirst($category) . "
+Submitted: " . date('Y-m-d H:i:s') . "
+Status: Open
+========================================
+
+$responseMessage
+
+If you have any additional information to add to this case, please reply to this email with your Case ID.
+
+Best regards,
+HarmaalWale Support Team
+support@harmaalwale.com
+";
+        
+        $headers = "From: noreply@harmaalwale.com\r\n";
+        $headers .= "Reply-To: support@harmaalwale.com\r\n";
+        $headers .= "X-Mailer: HarmaalWale System\r\n";
+        
+        mail($email, $customerSubject, $customerEmailBody, $headers);
+        
+        // ========== Send Notification to Support Team ==========
+        $supportSubject = "New Support Ticket - $caseId - " . ucfirst($category);
+        
+        $supportEmailBody = "
+NEW SUPPORT TICKET RECEIVED
+========================================
+
+Case ID: $caseId
+Category: " . ucfirst($category) . "
+Status: Open
+Received: " . date('Y-m-d H:i:s') . "
+
+CUSTOMER INFORMATION
+========================================
+Name: $name
+Email: $email
+Phone: $phone
+
+ISSUE DETAILS
+========================================
+$message
+
+ACTION REQUIRED:
+- Review and respond within appropriate timeframe
+- Update status in system
+- Provide resolution or escalate if needed
+
+========================================
+HarmaalWale Automated System
+";
+        
+        mail('support@harmaalwale.com', $supportSubject, $supportEmailBody, $headers);
+        
+        // ========== Success Response ==========
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'caseId' => $caseId,
+            'message' => 'Your concern will be addressed soon',
+            'responseMessage' => $responseMessage
+        ]);
+        
+    } catch(PDOException $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Database error: ' . $e->getMessage()
+        ]);
+    }
+    
+} else if($_SERVER['REQUEST_METHOD'] === 'GET') {
+    
+    // Get ticket status
+    if(isset($_GET['case_id'])) {
+        $caseId = $_GET['case_id'];
+        
+        try {
+            $stmt = $pdo->prepare("
+                SELECT case_id, status, name, email, created_at 
+                FROM support_tickets 
+                WHERE case_id = ?
+            ");
+            
+            $stmt->execute([$caseId]);
+            $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if($ticket) {
+                echo json_encode([
+                    'success' => true,
+                    'ticket' => $ticket
+                ]);
+            } else {
+                http_response_code(404);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Case not found'
+                ]);
+            }
+        } catch(PDOException $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
+    } else {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Case ID required'
+        ]);
+    }
+    
+} else {
+    http_response_code(405);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Method not allowed'
+    ]);
 }
-if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    jsonResponse(['error' => 'Invalid email address'], 400);
-}
-
-// ── Save to database ─────────────────────────────────────────
-$db   = getDB();
-$stmt = $db->prepare(
-    "INSERT INTO enquiries (name,email,mobile,subject,message,type) VALUES (?,?,?,?,?,?)"
-);
-$stmt->bind_param('ssssss', $name, $email, $mobile, $subject, $message, $type);
-$stmt->execute();
-$enquiryId = $db->insert_id;
-$db->close();
-
-// ── Email to support@harmaalwale.com ─────────────────────────
-$adminBody = emailTemplate("New Support Enquiry #$enquiryId",
-    "<p>You have received a new enquiry on HarmaalWale.</p>
-     <table style='width:100%;border-collapse:collapse'>
-       <tr><td style='padding:8px;background:#f5f5f5;font-weight:700;width:120px'>From</td>
-           <td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($name) . "</td></tr>
-       <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Email</td>
-           <td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($email ?: '—') . "</td></tr>
-       <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Mobile</td>
-           <td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($mobile ?: '—') . "</td></tr>
-       <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Subject</td>
-           <td style='padding:8px;border-bottom:1px solid #eee'>" . htmlspecialchars($subject) . "</td></tr>
-       <tr><td style='padding:8px;background:#f5f5f5;font-weight:700'>Type</td>
-           <td style='padding:8px;border-bottom:1px solid #eee'>" . ucfirst($type) . "</td></tr>
-       <tr><td style='padding:8px;background:#f5f5f5;font-weight:700;vertical-align:top'>Message</td>
-           <td style='padding:8px'>" . nl2br(htmlspecialchars($message)) . "</td></tr>
-     </table>
-     <p style='margin-top:20px'>Reply directly to this email to respond to the customer.</p>"
-);
-
-$replyTo = $email ?: MAIL_SUPPORT;
-sendEmail(MAIL_SUPPORT, "[$type] $subject — Enquiry #$enquiryId", $adminBody, $replyTo);
-
-// ── Confirmation email to user (if email provided) ───────────
-if ($email) {
-    $userBody = emailTemplate('We received your message!',
-        "<p>Hi <strong>" . htmlspecialchars($name) . "</strong>,</p>
-         <p>Thank you for reaching out to HarmaalWale. We've received your message and our support team will get back to you within <strong>24 hours</strong>.</p>
-         <p><strong>Your message:</strong></p>
-         <p style='background:#f5f5f5;padding:16px;border-radius:6px;color:#444'>" . nl2br(htmlspecialchars($message)) . "</p>
-         <p>For urgent queries, you can also reach us on WhatsApp:</p>
-         <a href='https://wa.me/917891004042' class='btn'>💬 Chat on WhatsApp</a>
-         <p style='color:#aaa;font-size:12px'>Reference: #$enquiryId</p>"
-    );
-    sendEmail($email, 'We received your message — HarmaalWale', $userBody);
-}
-
-jsonResponse([
-    'success'    => true,
-    'message'    => 'Your message has been sent! We\'ll get back to you within 24 hours.',
-    'enquiry_id' => $enquiryId
-]);
+?>

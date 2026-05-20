@@ -1,0 +1,149 @@
+```html
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sell With Us - HarmaalWale</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/hw.css">
+  <style>
+    .seller-wrap { min-height: calc(100vh - 66px); padding: 60px 16px; background: var(--bg); }
+    .seller-container { max-width: 700px; margin: 0 auto; }
+    .seller-header { text-align: center; margin-bottom: 48px; }
+    .seller-header h1 { font-family: 'Barlow Condensed'; font-size: 36px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+    .seller-header span { color: var(--accent); }
+    .seller-box { background: var(--bg-2); border: 1.5px solid var(--border); border-radius: 16px; padding: 40px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text); font-size: 14px; }
+    .form-input, .form-textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; background: var(--bg); color: var(--text); }
+    .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+    .form-hint { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+  </style>
+</head>
+<body>
+ 
+<nav class="nav">
+  <a class="nav-back" href="index.html">← Back</a>
+  <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label" id="themeLabel">Light</span>
+    </div>
+  </div>
+</nav>
+ 
+<div class="seller-wrap">
+  <div class="seller-container">
+    <div class="seller-header">
+      <h1>Sell on <span>HarmaalWale</span></h1>
+      <p style="color: var(--text-3);">Register as a seller and start earning today</p>
+    </div>
+ 
+    <div class="seller-box">
+      <div id="alertBox"></div>
+ 
+      <form id="sellerForm" onsubmit="submitSeller(event)">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" id="sellerName" class="form-input" required>
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Business Name *</label>
+          <input type="text" id="businessName" class="form-input" required>
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">GST Number *</label>
+          <input type="text" id="gstNumber" class="form-input" placeholder="22AAAAA0000A1Z5" required>
+          <div class="form-hint">Valid GST format required. Will be verified against government database.</div>
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">PAN (optional)</label>
+          <input type="text" id="panNumber" class="form-input" placeholder="AAAPB1234C">
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="sellerEmail" class="form-input" required>
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="tel" id="sellerPhone" class="form-input" required>
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Product Category *</label>
+          <select id="productCategory" class="form-input" required>
+            <option value="">Select category</option>
+            <option value="refurbished-mfds">Refurbished MFDS</option>
+            <option value="mfd-spares">MFD Spares</option>
+            <option value="it-products">IT Products</option>
+            <option value="fashion">Fashion</option>
+          </select>
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Business Address *</label>
+          <textarea id="businessAddress" class="form-textarea" required></textarea>
+        </div>
+ 
+        <button type="submit" class="btn btn-primary btn-block">Register as Seller</button>
+      </form>
+    </div>
+ 
+    <div style="text-align: center; margin-top: 40px; color: var(--text-3);">
+      <p>Questions? <a href="support.html" style="color: var(--accent);">Contact our seller support team</a></p>
+    </div>
+  </div>
+</div>
+ 
+<script>
+const html = document.documentElement, lbl = document.getElementById('themeLabel');
+const saved = localStorage.getItem('hw-theme') || 'light';
+function setTheme(t) { html.setAttribute('data-theme', t); lbl.textContent = t === 'dark' ? 'Dark' : 'Light'; localStorage.setItem('hw-theme', t); }
+function toggleTheme() { setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+setTheme(saved);
+ 
+async function submitSeller(e) {
+  e.preventDefault();
+  
+  const formData = {
+    name: document.getElementById('sellerName').value,
+    business_name: document.getElementById('businessName').value,
+    gst_number: document.getElementById('gstNumber').value,
+    pan: document.getElementById('panNumber').value,
+    email: document.getElementById('sellerEmail').value,
+    phone: document.getElementById('sellerPhone').value,
+    category: document.getElementById('productCategory').value,
+    address: document.getElementById('businessAddress').value
+  };
+ 
+  try {
+    const res = await fetch('/api/seller.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      document.getElementById('alertBox').innerHTML = `<div class="alert alert-success">✓ Application submitted! Case ID: ${data.case_id}</div>`;
+      document.getElementById('sellerForm').reset();
+      setTimeout(() => document.getElementById('alertBox').innerHTML = '', 5000);
+    } else {
+      document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">${data.error}</div>`;
+    }
+  } catch (e) {
+    document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
+  }
+}
+</script>
+ 
+</body>
+</html>
+```

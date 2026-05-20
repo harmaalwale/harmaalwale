@@ -1,0 +1,60 @@
+# HarmaalWale - URL Rewriting Rules
+# This file hides .html extensions from URLs
+
+# Enable Rewrite Engine
+RewriteEngine On
+RewriteBase /
+
+# Remove www (optional - forces non-www)
+# RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# Force HTTPS (optional - uncomment to force SSL)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Remove trailing slash (optional)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} (.+)/$
+RewriteRule ^ %1 [R=301,L]
+
+# Redirect .html URLs to clean URLs
+# Example: /support.html → /support
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.html [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# Serve .html files for clean URLs
+# Example: /support → serves support.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)$ $1.html [L]
+
+# Custom Error Pages (optional)
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
+# Security Headers (optional but recommended)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Cache Control (optional)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Prevent Directory Browsing
+Options -Indexes
+
+# Protect .htaccess file
+<Files .htaccess>
+    Order allow,deny
+    Deny from all
+</Files>

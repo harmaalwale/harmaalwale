@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Send Enquiry - HarmaalWale</title>
+    <link rel="stylesheet" href="assets/css/hw.css">
+</head>
+<body>
+    <div class="nav"><!-- include nav --></div>
+    
+    <div class="content">
+        <div class="enquiry-form-container">
+            <h1>Send Enquiry</h1>
+            <form id="enquiry-form">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <input type="tel" name="phone" placeholder="Your Phone" required>
+                <input type="text" name="subject" placeholder="Subject" required>
+                <textarea name="message" placeholder="Your Message" rows="6" required></textarea>
+                <button type="submit">Send Enquiry</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.getElementById('enquiry-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch('api/enquiries.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(d => {
+            if(d.success) {
+                alert('Enquiry sent! We will contact you soon.');
+                this.reset();
+            }
+        });
+    });
+    </script>
+</body>
+</html>

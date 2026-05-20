@@ -22,254 +22,464 @@
     .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
     .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
     .divider span { font-size: 12px; color: var(--text-3); font-weight: 600; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; }
+    
+    /* Auth Switch */
+    .auth-switch {
+      text-align: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    .auth-switch a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 16px; }
     .modal.show { display: flex; }
+    .modal-content { background: var(--bg-2); border: 1.5px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--card-shadow); max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text); line-height: 1; }
+    .modal-close:hover { color: var(--accent); }
+    
+    /* Buttons */
+    .btn { padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-block; text-align: center; }
+    .btn-block { width: 100%; display: block; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-secondary { background: transparent; color: var(--text); border: 2px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    
+    /* Form */
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text); font-size: 13px; }
+    .form-label span { color: var(--accent); }
+    .form-input { width: 100%; padding: 11px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; color: var(--text); transition: all 0.2s; }
+    .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232, 112, 0, 0.1); }
+    .form-hint { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+    
+    /* Alert */
+    .alert { padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .alert-error { background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
+    .alert-success { background: rgba(22, 163, 74, 0.1); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.2); }
+
+    /* Create Account Highlight */
+    .create-account-section {
+      background: linear-gradient(135deg, rgba(232, 112, 0, 0.05), rgba(232, 112, 0, 0.1));
+      border: 1px solid rgba(232, 112, 0, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .create-account-section p {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 12px;
+    }
+    .create-account-btn {
+      background: linear-gradient(135deg, var(--accent), #ff8c1a);
+      color: #fff;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .create-account-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(232, 112, 0, 0.3);
+    }
+
+    /* Nav Back */
+    .nav-back {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
   </style>
 </head>
 <body>
 
+<!-- ── NAVIGATION ──────────────────────────────────── -->
 <nav class="nav">
-  <a class="nav-back" href="index.html">← Back</a>
+  <a class="nav-back" href="index.html">← Back to Home</a>
   <a class="nav-logo" href="index.html">HARMAAL<span>WALE</span></a>
   <div class="nav-right">
-    <div class="theme-toggle" onclick="toggleTheme()">
+    <div class="theme-toggle" onclick="hwToggleTheme()">
       <div class="toggle-track"><div class="toggle-knob"></div></div>
       <span class="toggle-label" id="themeLabel">Light</span>
     </div>
   </div>
 </nav>
 
+<!-- ── LOGIN CONTAINER ─────────────────────────────── -->
 <div class="login-wrap">
-  <div class="login-box">
-    <h1 class="login-title">Login or <span>Sign Up</span></h1>
-    <p class="login-sub">Enter your mobile, email, or admin username</p>
-
-    <div id="alertBox"></div>
-
+  <div class="login-box" id="auth-form" data-mode="login">
+    
+    <!-- STEP 1: MOBILE/EMAIL INPUT -->
     <div class="step active" id="step1">
+      <h1 class="login-title">Welcome <span>Back</span></h1>
+      <p class="login-sub">Enter your mobile, email, or admin username to continue</p>
+
+      <div id="alertBox"></div>
+
       <div class="form-group">
-        <label class="form-label">Email, Mobile, or Username <span>*</span></label>
-        <input type="text" id="mobileInput" class="form-input" placeholder="9876543210 / you@email.com / Admin">
-        <div class="form-hint">Customers & vendors: use mobile or email · Admin: enter username</div>
+        <label class="form-label">Mobile, Email, or Username <span>*</span></label>
+        <input type="text" id="mobileInput" class="form-input" placeholder="9876543210 / you@email.com / admin" autocomplete="off">
+        <div class="form-hint">Customers & vendors: use mobile or email · Admin: use username</div>
       </div>
-      <button class="btn btn-primary btn-block" onclick="sendOTP()">Continue →</button>
+      <button class="btn btn-primary btn-block" onclick="sendOTP()">Continue with OTP →</button>
     </div>
 
+    <!-- STEP 2: OTP VERIFICATION -->
     <div class="step" id="step2">
+      <h1 class="login-title">Verify <span>OTP</span></h1>
+      <p class="login-sub">We've sent a code to your mobile</p>
+
+      <div id="alertBox2"></div>
+
       <div class="form-group">
-        <label class="form-label">OTP sent to <span id="maskedMobile"></span></label>
-        <input type="text" id="otpInput" class="form-input" placeholder="Enter 6-digit OTP" maxlength="6">
-        <div class="form-hint"><a href="#" onclick="goBack(); return false;" style="color: var(--accent);">Change number</a></div>
+        <label class="form-label">Enter 6-Digit OTP <span>*</span></label>
+        <input type="text" id="otpInput" class="form-input" placeholder="000000" maxlength="6" autocomplete="off">
+        <div class="form-hint" style="text-align: center;">
+          <a href="#" onclick="goBack(); return false;" style="color: var(--accent); font-weight: 600;">Change number</a>
+        </div>
       </div>
-      <button class="btn btn-primary btn-block" onclick="verifyOTP()">Verify & Login</button>
+      <button class="btn btn-primary btn-block" onclick="verifyOTP()">Verify & Login →</button>
+      <div id="timer"></div>
     </div>
 
+    <!-- STEP 3: COMPLETE PROFILE -->
     <div class="step" id="step3">
+      <h1 class="login-title">Almost <span>Done</span></h1>
+      <p class="login-sub">Complete your profile to finish registration</p>
+
+      <div id="alertBox3"></div>
+
       <div class="form-group">
         <label class="form-label">Your Full Name <span>*</span></label>
-        <input type="text" id="nameInput" class="form-input" placeholder="Enter your name">
+        <input type="text" id="nameInput" class="form-input" placeholder="Enter your full name" autocomplete="name">
       </div>
       <div class="form-group">
-        <label class="form-label">Email Address <span style="color:var(--text-3);">(optional)</span></label>
-        <input type="email" id="emailInput" class="form-input" placeholder="you@example.com">
+        <label class="form-label">Email Address <span style="color: var(--text-3);">(optional)</span></label>
+        <input type="email" id="emailInput" class="form-input" placeholder="you@example.com" autocomplete="email">
       </div>
       <button class="btn btn-primary btn-block" onclick="completeRegistration()">Create Account →</button>
     </div>
 
+    <!-- CREATE ACCOUNT SECTION -->
+    <div class="create-account-section" id="createAccountSection">
+      <p>Don't have an account?</p>
+      <button class="create-account-btn" onclick="openSignupModal()">📝 Create New Account</button>
+    </div>
+
+    <!-- DIVIDER -->
     <div class="divider"><span>OR</span></div>
-    
-    <!-- THIS IS THE BUTTON THAT SHOULD BE VISIBLE -->
-    <button class="btn btn-secondary btn-block" onclick="openSignupModal()" style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">
-      📝 Create New Account
-    </button>
-    
+
+    <!-- HELP BUTTON -->
     <a class="btn btn-outline btn-block" href="https://wa.me/917891004042" target="_blank" style="text-decoration: none;">
       💬 Need Help? WhatsApp Us
     </a>
+
+    <!-- AUTH SWITCH -->
+    <div class="auth-switch" id="authSwitch" style="display: none;">
+      <p>Already have account? <a href="#" onclick="switchToLogin(); return false;">Sign In</a></p>
+    </div>
   </div>
 </div>
 
-<!-- SIGNUP MODAL -->
+<!-- ── SIGNUP MODAL ────────────────────────────────── -->
 <div id="signupModal" class="modal">
-  <div class="login-box" style="max-height: 90vh; overflow-y: auto;">
-    <div style="text-align: right; margin-bottom: 16px;">
-      <button onclick="closeSignupModal()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text);">×</button>
-    </div>
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeSignupModal()">×</button>
     
     <h2 class="login-title">Create <span>Account</span></h2>
-    <p class="login-sub">Register with email & password</p>
+    <p class="login-sub">Sign up with your email and password</p>
     
     <div id="signupAlert"></div>
     
     <div class="form-group">
       <label class="form-label">Full Name <span>*</span></label>
-      <input type="text" id="signupName" class="form-input" placeholder="Your name">
+      <input type="text" id="signupName" class="form-input" placeholder="Your full name" autocomplete="name">
     </div>
     
     <div class="form-group">
       <label class="form-label">Email <span>*</span></label>
-      <input type="email" id="signupEmail" class="form-input" placeholder="you@example.com">
+      <input type="email" id="signupEmail" class="form-input" placeholder="you@example.com" autocomplete="email">
     </div>
     
     <div class="form-group">
-      <label class="form-label">Mobile <span>*</span></label>
-      <div style="display: flex; gap: 8px;">
-        <div style="padding: 11px 12px; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px;">+91</div>
-        <input type="tel" id="signupMobile" class="form-input" placeholder="10-digit mobile" maxlength="10">
+      <label class="form-label">Mobile Number <span>*</span></label>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="padding: 11px 12px; background: var(--bg-3); border: 1.5px solid var(--border); border-radius: 8px; font-weight: 600; color: var(--text); white-space: nowrap;">+91</div>
+        <input type="tel" id="signupMobile" class="form-input" placeholder="10-digit mobile" maxlength="10" style="flex: 1;" autocomplete="tel">
       </div>
     </div>
     
     <div class="form-group">
       <label class="form-label">Password <span>*</span></label>
-      <input type="password" id="signupPassword" class="form-input" placeholder="Min 6 characters">
+      <input type="password" id="signupPassword" class="form-input" placeholder="Min 6 characters" autocomplete="new-password">
+      <div class="form-hint">Must be at least 6 characters long</div>
     </div>
     
     <div class="form-group">
       <label class="form-label">Confirm Password <span>*</span></label>
-      <input type="password" id="signupConfirm" class="form-input" placeholder="Re-enter password">
+      <input type="password" id="signupConfirm" class="form-input" placeholder="Re-enter your password" autocomplete="new-password">
     </div>
     
     <button class="btn btn-primary btn-block" onclick="registerAccount()">Create Account →</button>
     
-    <p style="text-align: center; font-size: 13px; color: var(--text-3); margin-top: 16px;">
-      Already have account? <a href="#" onclick="closeSignupModal(); return false;" style="color: var(--accent); font-weight: 600;">Sign In</a>
-    </p>
+    <div class="auth-switch">
+      Already have an account? <a href="#" onclick="closeSignupModal(); return false;">Sign In</a>
+    </div>
   </div>
 </div>
 
+<!-- ── SCRIPTS ─────────────────────────────────────── -->
+<script src="assets/js/hw.js"></script>
+
 <script>
-const API = '/api/auth.php';
-let currentMobile = '';
+  const API = '/api/auth.php';
+  let currentMobile = '';
 
-// Theme
-const html = document.documentElement, lbl = document.getElementById('themeLabel');
-const saved = localStorage.getItem('hw-theme') || 'light';
-function setTheme(t) { html.setAttribute('data-theme', t); lbl.textContent = t === 'dark' ? 'Dark' : 'Light'; localStorage.setItem('hw-theme', t); }
-function toggleTheme() { setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
-setTheme(saved);
-
-// Check if logged in
-if (localStorage.getItem('hw_token')) window.location.href = 'account.html';
-
-function showAlert(msg, type = 'error') {
-  const box = document.getElementById('alertBox');
-  box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-  setTimeout(() => box.innerHTML = '', 5000);
-}
-
-function showStep(n) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step' + n).classList.add('active');
-}
-
-function goBack() { showStep(1); }
-
-async function sendOTP() {
-  const mobile = document.getElementById('mobileInput').value.trim();
-  if (!mobile) { showAlert('Please enter mobile, email or username'); return; }
-  currentMobile = mobile;
+  // ── THEME SYSTEM ──────────────────────────────────
+  const html = document.documentElement;
+  const themeLabel = document.getElementById('themeLabel');
+  const savedTheme = localStorage.getItem('hw-theme') || 'light';
   
-  try {
-    const res = await fetch(API + '?action=send_otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile })
-    });
-    const data = await res.json();
-    if (!data.success) { showAlert(data.error || 'Failed to send OTP'); return; }
-    document.getElementById('maskedMobile').textContent = mobile;
-    showStep(2);
-    showAlert('OTP sent!', 'success');
-  } catch (e) { showAlert('Network error'); }
-}
-
-async function verifyOTP() {
-  const otp = document.getElementById('otpInput').value.trim();
-  if (otp.length !== 6) { showAlert('Enter 6-digit OTP'); return; }
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    themeLabel.textContent = theme === 'dark' ? 'Dark' : 'Light';
+    localStorage.setItem('hw-theme', theme);
+  }
   
-  try {
-    const res = await fetch(API + '?action=verify_otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: currentMobile, otp })
-    });
-    const data = await res.json();
-    if (data.needs_name) { showStep(3); return; }
-    if (!data.success) { showAlert(data.error || 'Invalid OTP'); return; }
-    loginSuccess(data);
-  } catch (e) { showAlert('Network error'); }
-}
-
-async function completeRegistration() {
-  const name = document.getElementById('nameInput').value.trim();
-  if (!name) { showAlert('Enter your name'); return; }
-  const email = document.getElementById('emailInput').value.trim();
-  const otp = document.getElementById('otpInput').value.trim();
+  function hwToggleTheme() {
+    const current = html.getAttribute('data-theme');
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  }
   
-  try {
-    const res = await fetch(API + '?action=verify_otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: currentMobile, otp, name, email })
-    });
-    const data = await res.json();
-    if (!data.success) { showAlert(data.error); return; }
-    loginSuccess(data);
-  } catch (e) { showAlert('Network error'); }
-}
+  setTheme(savedTheme);
 
-function loginSuccess(data) {
-  localStorage.setItem('hw_token', data.token);
-  localStorage.setItem('hw_user', JSON.stringify(data.user));
-  showAlert('Welcome! Redirecting...', 'success');
-  setTimeout(() => window.location.href = 'account.html', 1000);
-}
+  // ── CHECK IF ALREADY LOGGED IN ─────────────────────
+  if (localStorage.getItem('hw_token')) {
+    window.location.href = 'account.html';
+  }
 
-// SIGNUP MODAL
-function openSignupModal() {
-  document.getElementById('signupModal').classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
+  // ── UTILITIES ──────────────────────────────────────
+  function showAlert(msg, type = 'error', stepNum = 1) {
+    const box = document.getElementById('alertBox' + (stepNum > 1 ? stepNum : ''));
+    box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    setTimeout(() => box.innerHTML = '', 5000);
+  }
 
-function closeSignupModal() {
-  document.getElementById('signupModal').classList.remove('show');
-  document.body.style.overflow = 'auto';
-}
+  function showStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+  }
 
-function showSignupAlert(msg, type = 'error') {
-  const box = document.getElementById('signupAlert');
-  box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-  setTimeout(() => box.innerHTML = '', 5000);
-}
+  function goBack() {
+    showStep(1);
+    document.getElementById('mobileInput').focus();
+  }
 
-async function registerAccount() {
-  const name = document.getElementById('signupName').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const mobile = document.getElementById('signupMobile').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const confirm = document.getElementById('signupConfirm').value;
-  
-  if (!name || !email || !mobile || !password) { showSignupAlert('All fields required'); return; }
-  if (mobile.length !== 10) { showSignupAlert('Enter valid 10-digit mobile'); return; }
-  if (password.length < 6) { showSignupAlert('Password min 6 characters'); return; }
-  if (password !== confirm) { showSignupAlert('Passwords do not match'); return; }
-  
-  try {
-    const res = await fetch(API + '?action=register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, mobile, password })
-    });
-    const data = await res.json();
-    if (!data.success) { showSignupAlert(data.error); return; }
-    showSignupAlert('Account created! Check email to verify.', 'success');
-    setTimeout(() => closeSignupModal(), 2000);
-  } catch (e) { showSignupAlert('Network error'); }
-}
-//TestingComment
-//TestingComment2
-//TestingComment3
-//TestingComment4
+  function switchToLogin() {
+    closeSignupModal();
+    goBack();
+  }
+
+  // ── OTP LOGIN FLOW ────────────────────────────────
+  async function sendOTP() {
+    const mobile = document.getElementById('mobileInput').value.trim();
+    if (!mobile) {
+      showAlert('Please enter your mobile, email, or username', 'error', 1);
+      return;
+    }
+    currentMobile = mobile;
+    
+    try {
+      const res = await fetch(API + '?action=send_otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showAlert(data.error || 'Failed to send OTP. Please try again.', 'error', 1);
+        return;
+      }
+      showStep(2);
+      showAlert('OTP sent to your mobile!', 'success', 2);
+      document.getElementById('otpInput').focus();
+    } catch (e) {
+      showAlert('Network error. Please check your connection.', 'error', 1);
+    }
+  }
+
+  async function verifyOTP() {
+    const otp = document.getElementById('otpInput').value.trim();
+    if (otp.length !== 6 || isNaN(otp)) {
+      showAlert('Please enter a valid 6-digit OTP', 'error', 2);
+      return;
+    }
+    
+    try {
+      const res = await fetch(API + '?action=verify_otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: currentMobile, otp })
+      });
+      const data = await res.json();
+      
+      if (data.needs_name) {
+        showStep(3);
+        document.getElementById('nameInput').focus();
+        return;
+      }
+      
+      if (!data.success) {
+        showAlert(data.error || 'Invalid OTP. Please try again.', 'error', 2);
+        return;
+      }
+      
+      loginSuccess(data);
+    } catch (e) {
+      showAlert('Network error. Please try again.', 'error', 2);
+    }
+  }
+
+  async function completeRegistration() {
+    const name = document.getElementById('nameInput').value.trim();
+    if (!name) {
+      showAlert('Please enter your name', 'error', 3);
+      return;
+    }
+    
+    const email = document.getElementById('emailInput').value.trim();
+    const otp = document.getElementById('otpInput').value.trim();
+    
+    try {
+      const res = await fetch(API + '?action=verify_otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: currentMobile, otp, name, email: email || null })
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        showAlert(data.error || 'Failed to create account', 'error', 3);
+        return;
+      }
+      
+      loginSuccess(data);
+    } catch (e) {
+      showAlert('Network error. Please try again.', 'error', 3);
+    }
+  }
+
+  function loginSuccess(data) {
+    localStorage.setItem('hw_token', data.token);
+    localStorage.setItem('hw_user', JSON.stringify(data.user));
+    showAlert('Welcome! Account created successfully. Redirecting...', 'success', 3);
+    setTimeout(() => {
+      window.location.href = data.user.role === 'admin' ? 'admin.html' : 
+                             data.user.role === 'vendor' ? 'vendor-dashboard.html' : 
+                             'account.html';
+    }, 1500);
+  }
+
+  // ── SIGNUP MODAL ───────────────────────────────────
+  function openSignupModal() {
+    document.getElementById('signupModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('signupName').focus();
+  }
+
+  function closeSignupModal() {
+    document.getElementById('signupModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+  }
+
+  function showSignupAlert(msg, type = 'error') {
+    const box = document.getElementById('signupAlert');
+    box.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    setTimeout(() => box.innerHTML = '', 5000);
+  }
+
+  async function registerAccount() {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const mobile = document.getElementById('signupMobile').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirm = document.getElementById('signupConfirm').value;
+    
+    if (!name || !email || !mobile || !password) {
+      showSignupAlert('All fields are required', 'error');
+      return;
+    }
+    
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showSignupAlert('Please enter a valid email address', 'error');
+      return;
+    }
+    
+    if (mobile.length !== 10 || isNaN(mobile)) {
+      showSignupAlert('Please enter a valid 10-digit mobile number', 'error');
+      return;
+    }
+    
+    if (password.length < 6) {
+      showSignupAlert('Password must be at least 6 characters long', 'error');
+      return;
+    }
+    
+    if (password !== confirm) {
+      showSignupAlert('Passwords do not match', 'error');
+      return;
+    }
+    
+    try {
+      const res = await fetch(API + '?action=register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, mobile: '+91' + mobile, password })
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        showSignupAlert(data.error || 'Registration failed. Please try again.', 'error');
+        return;
+      }
+      
+      showSignupAlert('Account created successfully! Please check your email to verify. Redirecting...', 'success');
+      setTimeout(() => {
+        closeSignupModal();
+        document.getElementById('mobileInput').value = mobile;
+      }, 2000);
+    } catch (e) {
+      showSignupAlert('Network error. Please try again.', 'error');
+    }
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('signupModal').addEventListener('click', function(e) {
+    if (e.target === this) closeSignupModal();
+  });
 </script>
 
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Support - HarmaalWale</title>
+  <title>FAQ - HarmaalWale</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
@@ -149,75 +149,43 @@
       margin-bottom: 48px;
     }
     
-    .form-box {
+    .faq-item {
       background: var(--bg-2);
       border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 40px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
     }
     
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    
-    .form-input, .form-textarea, .form-select {
-      width: 100%;
-      padding: 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Barlow', sans-serif;
-    }
-    
-    .form-textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
-    
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
+    .faq-question {
+      padding: 20px;
       cursor: pointer;
-      transition: all 0.3s;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
-    .btn:hover {
-      background: #cf6600;
-      transform: translateY(-2px);
+    .faq-question:hover {
+      background: var(--bg);
     }
     
-    .alert {
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+    .faq-icon {
+      font-size: 24px;
+      color: var(--accent);
     }
     
-    .alert-success {
-      background: #d4edda;
-      color: #155724;
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s;
+      padding: 0 20px;
+      color: var(--text-3);
     }
     
-    .alert-error {
-      background: #f8d7da;
-      color: #721c24;
-    }
-    
-    .alert-info {
-      background: #d1ecf1;
-      color: #0c5460;
+    .faq-answer.active {
+      max-height: 500px;
+      padding: 0 20px 20px 20px;
     }
     
     .footer {
@@ -254,13 +222,13 @@
     <a href="/" class="nav-link">Home</a>
     <a href="coming-soon.html?category=it-products" class="nav-link">IT Products</a>
     <a href="coming-soon.html?category=refurbished-mfds" class="nav-link">Refurbished MFDS</a>
-    <a href="coming-soon.html?category=mfd-spares" class="nav-link">MFD Spares</a>
+    <a href="mfd-spares.html" class="nav-link">MFD Spares</a>
     <a href="coming-soon.html?category=fashion" class="nav-link">Fashion</a>
-    <a href="support.html" class="nav-link active">Support</a>
+    <a href="support.html" class="nav-link">Support</a>
   </div>
   
   <div class="nav-right">
-    <div class="nav-icon" onclick="openLoginModal()" title="My Account">
+    <div class="nav-icon" onclick="location.href='account.html'" title="My Account">
       <span>👤</span>
     </div>
     
@@ -286,47 +254,46 @@
 </nav>
  
 <main class="container">
-  <h1>Get <span style="color: var(--accent);">Support</span></h1>
+  <h1>Frequently Asked <span style="color: var(--accent);">Questions</span></h1>
+  
+  <div class="faq-item">
+    <div class="faq-question" onclick="toggleFaq(this)">
+      <span>Do you deliver across India?</span>
+      <span class="faq-icon">+</span>
+    </div>
+    <div class="faq-answer">
+      Yes! We deliver pan-India. Delivery typically takes <strong>4-12 days</strong> depending on your location.
+    </div>
+  </div>
  
-  <div class="form-box">
-    <div id="alertBox"></div>
+  <div class="faq-item">
+    <div class="faq-question" onclick="toggleFaq(this)">
+      <span>How do I return an item?</span>
+      <span class="faq-icon">+</span>
+    </div>
+    <div class="faq-answer">
+      You can initiate a return from your account dashboard. Select the order, choose a reason, and submit.
+    </div>
+  </div>
  
-    <form id="supportForm" onsubmit="submitSupport(event)">
-      <div class="form-group">
-        <label class="form-label">Your Name <span style="color: red;">*</span></label>
-        <input type="text" id="supportName" class="form-input" required>
-      </div>
+  <div class="faq-item">
+    <div class="faq-question" onclick="toggleFaq(this)">
+      <span>Are products quality checked?</span>
+      <span class="faq-icon">+</span>
+    </div>
+    <div class="faq-answer">
+      Yes! All refurbished products undergo rigorous quality checks and come with warranty.
+    </div>
+  </div>
  
-      <div class="form-group">
-        <label class="form-label">Email <span style="color: red;">*</span></label>
-        <input type="email" id="supportEmail" class="form-input" required>
-      </div>
- 
-      <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input type="tel" id="supportPhone" class="form-input">
-      </div>
- 
-      <div class="form-group">
-        <label class="form-label">Category <span style="color: red;">*</span></label>
-        <select id="supportCategory" class="form-select" required>
-          <option value="">Select category</option>
-          <option value="order-issue">Order Issue</option>
-          <option value="refund-issue">Refund Issue</option>
-          <option value="technical-support">Technical Support</option>
-          <option value="seller-support">Seller Support</option>
-          <option value="product-enquiry">Product Enquiry</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
- 
-      <div class="form-group">
-        <label class="form-label">Message <span style="color: red;">*</span></label>
-        <textarea id="supportMessage" class="form-textarea" required></textarea>
-      </div>
- 
-      <button type="submit" class="btn">Send Message</button>
-    </form>
+  <div class="faq-item">
+    <div class="faq-question" onclick="toggleFaq(this)">
+      <span>How do I become a seller?</span>
+      <span class="faq-icon">+</span>
+    </div>
+    <div class="faq-answer">
+      Visit our <a href="sell-with-us.html" style="color: var(--accent);">Sell With Us</a> page and complete the registration form.
+    </div>
   </div>
 </main>
  
@@ -370,52 +337,11 @@ function checkLogin() {
  
 checkLogin();
  
-function openLoginModal() {
-  alert('Login modal will be implemented');
-}
- 
-// FIXED: Support form submission with local testing support
-async function submitSupport(e) {
-  e.preventDefault();
-  
-  const name = document.getElementById('supportName').value;
-  const email = document.getElementById('supportEmail').value;
-  const phone = document.getElementById('supportPhone').value;
-  const category = document.getElementById('supportCategory').value;
-  const message = document.getElementById('supportMessage').value;
- 
-  // Show info message for local testing
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
-    document.getElementById('alertBox').innerHTML = '<div class="alert alert-info">📌 Local Testing Mode: Form submitted successfully! In production, this will send to support@harmaalwale.com with case ID.</div>';
-    setTimeout(() => {
-      document.getElementById('supportForm').reset();
-    }, 2000);
-    return;
-  }
- 
-  // Production: Try to send to server
-  try {
-    const res = await fetch('/api/support.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone, category, message })
-    });
-    
-    const data = await res.json();
-    
-    if (data.success) {
-      document.getElementById('alertBox').innerHTML = '<div class="alert alert-success">✓ Message sent! Case ID: ' + data.case_id + '</div>';
-      document.getElementById('supportForm').reset();
-    } else {
-      document.getElementById('alertBox').innerHTML = '<div class="alert alert-error">✗ ' + (data.error || 'Failed') + '</div>';
-    }
-  } catch (err) {
-    // Fallback for testing
-    document.getElementById('alertBox').innerHTML = '<div class="alert alert-info">📌 Testing Mode: Form submitted! In production, email will be sent to support@harmaalwale.com</div>';
-    setTimeout(() => {
-      document.getElementById('supportForm').reset();
-    }, 2000);
-  }
+function toggleFaq(el) {
+  const answer = el.nextElementSibling;
+  const icon = el.querySelector('.faq-icon');
+  answer.classList.toggle('active');
+  icon.textContent = answer.classList.contains('active') ? '−' : '+';
 }
 </script>
  

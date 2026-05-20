@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coming Soon - HarmaalWale</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&family=Barlow:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Barlow', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      transition: background 0.3s;
+    }
+    
+    body.it-products { background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%); }
+    body.refurbished-mfds { background: linear-gradient(135deg, #1a1a1a 0%, #374151 100%); }
+    body.mfd-spares { background: linear-gradient(135deg, #E87000 0%, #ff8c00 100%); }
+    body.fashion { background: linear-gradient(135deg, #6B46C1 0%, #9F7AEA 100%); }
+    body.default { background: linear-gradient(135deg, #111827 0%, #1F2937 100%); }
+    
+    .container {
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+      color: white;
+    }
+    
+    .icon {
+      font-size: 96px;
+      margin-bottom: 24px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    h1 {
+      font-family: 'Barlow Condensed';
+      font-size: 56px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    p {
+      font-size: 18px;
+      opacity: 0.9;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+    
+    .back-btn {
+      display: inline-block;
+      padding: 14px 36px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 700;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+    
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="default">
+  
+  <div class="container">
+    <div class="icon" id="icon">🚀</div>
+    <h1 id="title">Coming Soon</h1>
+    <p id="description">We're working on something amazing. Stay tuned!</p>
+    
+    <a href="/" class="back-btn">← Back to Home</a>
+  </div>
+ 
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category') || 'default';
+    
+    const categories = {
+      'it-products': {
+        icon: '💻',
+        title: 'IT Products',
+        description: 'Computers, laptops, and peripherals coming soon!'
+      },
+      'refurbished-mfds': {
+        icon: '📠',
+        title: 'Refurbished MFDS',
+        description: 'Quality multifunction devices coming soon!'
+      },
+      'mfd-spares': {
+        icon: '⚙️',
+        title: 'MFD Spares',
+        description: 'Genuine parts and components coming soon! We will be adding products shortly.'
+      },
+      'fashion': {
+        icon: '👔',
+        title: 'Fashion',
+        description: 'Trending styles coming soon!'
+      },
+      'default': {
+        icon: '🚀',
+        title: 'Coming Soon',
+        description: 'We\'re working on something amazing!'
+      }
+    };
+    
+    const config = categories[category] || categories['default'];
+    document.body.className = category;
+    document.getElementById('icon').textContent = config.icon;
+    document.getElementById('title').textContent = config.title;
+    document.getElementById('description').textContent = config.description;
+    document.title = config.title + ' - Coming Soon | HarmaalWale';
+  </script>
+ 
+</body>
+</html>
