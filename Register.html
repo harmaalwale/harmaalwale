@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - HarmaalWale</title>
+  <title>Register - HarmaalWale</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
@@ -77,10 +77,7 @@
       font-size: 15px;
       font-weight: 600;
       color: var(--text-3);
-      transition: color 0.3s;
     }
-
-    .nav-link:hover { color: var(--accent); }
 
     .nav-right {
       display: flex;
@@ -93,25 +90,11 @@
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      padding: 8px 12px;
     }
-
-    .toggle-knob {
-      width: 20px;
-      height: 20px;
-      background: var(--bg-2);
-      border-radius: 50%;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      transition: left 0.3s;
-    }
-
-    [data-theme="dark"] .toggle-knob { left: 22px; }
 
     .container {
       max-width: 500px;
-      margin: 80px auto;
+      margin: 60px auto;
       padding: 0 24px;
     }
 
@@ -132,7 +115,7 @@
     h1 span { color: var(--accent); }
 
     .form-group {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .form-label {
@@ -144,7 +127,7 @@
 
     .form-input {
       width: 100%;
-      padding: 14px 16px;
+      padding: 12px 16px;
       border: 2px solid var(--border);
       border-radius: 12px;
       background: var(--bg);
@@ -173,7 +156,6 @@
 
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(232, 112, 0, 0.3);
     }
 
     .form-link {
@@ -219,51 +201,12 @@
       font-size: 14px;
     }
 
-    .footer-text a {
-      color: var(--accent);
-      font-weight: 600;
-    }
+    .footer-text a { color: var(--accent); }
 
     .divider {
       text-align: center;
       margin: 24px 0;
       color: var(--text-3);
-      position: relative;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 45%;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .divider::before { left: 0; }
-    .divider::after { right: 0; }
-
-    .whatsapp-btn {
-      width: 100%;
-      padding: 12px;
-      background: #25D366;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.3s;
-    }
-
-    .whatsapp-btn:hover {
-      background: #20b358;
-      transform: translateY(-2px);
     }
   </style>
 </head>
@@ -280,21 +223,30 @@
   <div class="nav-right">
     <div class="theme-toggle" onclick="toggleTheme()">
       <span style="font-size: 18px;">🌙</span>
-      <span style="font-size: 13px; color: var(--text-3);">Dark</span>
     </div>
   </div>
 </nav>
 
 <div class="container">
   <div class="form-box">
-    <h1>Login <span>Now</span></h1>
+    <h1>Create <span>Account</span></h1>
     
     <div id="alert" class="alert"></div>
     
-    <form id="loginForm" onsubmit="handleLogin(event)">
+    <form id="registerForm" onsubmit="handleRegister(event)">
       <div class="form-group">
-        <label class="form-label">Email, Mobile, or Username</label>
-        <input type="text" id="username" class="form-input" required>
+        <label class="form-label">Full Name</label>
+        <input type="text" id="fullname" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="email" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Mobile</label>
+        <input type="tel" id="mobile" class="form-input" required>
       </div>
       
       <div class="form-group">
@@ -302,18 +254,23 @@
         <input type="password" id="password" class="form-input" required>
       </div>
       
-      <button type="submit" class="btn">Login</button>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" id="confirm_password" class="form-input" required>
+      </div>
+      
+      <button type="submit" class="btn">Register Now</button>
     </form>
     
     <div class="divider">OR</div>
     
     <div class="form-link">
-      Don't have an account? <a href="/register">Register here</a>
+      Already have an account? <a href="/login">Login here</a>
     </div>
     
     <div style="margin-top: 24px;">
-      <button class="whatsapp-btn" onclick="location.href='https://wa.me/917891004042?text=Hi%20HarmaalWale%2C%20I%20need%20help%20with%20login'">
-        💬 Get Help on WhatsApp
+      <button type="button" class="btn" style="background: #25D366;" onclick="location.href='https://wa.me/917891004042?text=Hi%20HarmaalWale%2C%20I%20want%20to%20register'">
+        💬 Register via WhatsApp
       </button>
     </div>
   </div>
@@ -349,30 +306,38 @@ function showAlert(message, type) {
   alert.className = `alert alert-${type} show`;
 }
 
-function handleLogin(e) {
+function handleRegister(e) {
   e.preventDefault();
-  const username = document.getElementById('username').value;
+  
+  const fullname = document.getElementById('fullname').value;
+  const email = document.getElementById('email').value;
+  const mobile = document.getElementById('mobile').value;
   const password = document.getElementById('password').value;
-
-  showAlert('Processing login...', 'success');
-
-  fetch('/api/login.php', {
+  const confirm = document.getElementById('confirm_password').value;
+  
+  if (password !== confirm) {
+    showAlert('Passwords do not match', 'error');
+    return;
+  }
+  
+  showAlert('Creating account...', 'success');
+  
+  fetch('/api/register.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ fullname, email, mobile, password })
   })
   .then(r => r.json())
   .then(data => {
     if (data.success) {
-      showAlert('Login successful! Redirecting...', 'success');
-      localStorage.setItem('hw-token', data.token);
-      setTimeout(() => location.href = '/', 1500);
+      showAlert('Account created! Redirecting to login...', 'success');
+      setTimeout(() => location.href = '/login', 1500);
     } else {
-      showAlert(data.error || 'Login failed', 'error');
+      showAlert(data.error || 'Registration failed', 'error');
     }
   })
   .catch(err => {
-    showAlert('Unable to reach server. Try WhatsApp support.', 'error');
+    showAlert('Unable to reach server. Try WhatsApp.', 'error');
   });
 }
 </script>

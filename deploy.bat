@@ -1,292 +1,377 @@
 @echo off
 setlocal enabledelayedexpansion
+title HarmaalWale Deployment
 
-echo.
-echo ╔════════════════════════════════════════════════════════════════╗
-echo ║         HarmaalWale - Smart Deploy v3.0                        ║
-echo ║         GitHub: harmaalwale/harmaalwale.git                    ║
-echo ║         cPanel: harmaalwale.com                                ║
-echo ╚════════════════════════════════════════════════════════════════╝
-echo.
+REM Prevent editor popups during git operations
+set "GIT_MERGE_AUTOEDIT=no"
 
-REM Configuration
-set GITHUB_REPO=https://github.com/harmaalwale/harmaalwale.git
-set SSH_HOST=harmakko@harmaalwale.com
-set SSH_PORT=2222
-set REMOTE_PATH=/public_html
+REM ============================================================
+REM CONFIGURATION
+REM ============================================================
+set "GITHUB_REPO=https://github.com/harmaalwale/harmaalwale.git"
+set "GITHUB_BRANCH=main"
+set "SSH_HOST=harmakko@harmaalwale.com"
+set "SSH_PORT=2222"
+set "REMOTE_PATH=/public_html"
+set "DEPLOY_MARKER=.last_deployed"
 
-echo [STEP 1/5] Git Configuration & Sync
-echo ════════════════════════════════════════════════════════════════
-echo.
-
-REM ============================================================================
-REM STEP 1: GIT SETUP AND OPERATIONS
-REM ============================================================================
-
-echo Checking Git remote...
-git remote -v > git_remote.txt 2>nul
-
-findstr /C:"harmaalwale/harmaalwale" git_remote.txt >nul
-if errorlevel 1 (
-    echo Setting up GitHub remote...
-    git remote remove origin 2>nul
-    git remote add origin %GITHUB_REPO%
-    echo ✓ Remote set to: %GITHUB_REPO%
-) else (
-    echo ✓ Remote already configured
-)
-
-del git_remote.txt 2>nul
-
-echo.
-echo Checking for changes...
-git status --porcelain > git_status.txt
-for /f %%i in ('type git_status.txt ^| find /c /v ""') do set CHANGES=%%i
-
-if %CHANGES% GTR 0 (
-    echo ✓ Found %CHANGES% changed files
-    echo.
-    type git_status.txt
-    echo.
-    
-    echo Pulling from GitHub (harmaalwale/harmaalwale)...
-    git pull origin main 2>nul
-    if errorlevel 1 (
-        git pull origin master 2>nul
-    )
-    
-    echo Adding all changes...
-    git add -A
-    
-    set /p COMMIT_MSG="Commit message (Enter for auto): "
-    if "!COMMIT_MSG!"=="" set COMMIT_MSG=Deploy: %date% %time:~0,5%
-    
-    echo Committing with message: !COMMIT_MSG!
-    git commit -m "!COMMIT_MSG!"
-    
-    echo Pushing to GitHub (harmaalwale/harmaalwale)...
-    git push -u origin main 2>nul
-    if errorlevel 1 (
-        git push -u origin master 2>nul
-    )
-    
-    if errorlevel 1 (
-        echo [ERROR] Git push failed!
-        echo Possible reasons:
-        echo   - Check your GitHub credentials
-        echo   - Verify repository access
-        echo   - Check internet connection
-        pause
-        exit /b 1
-    )
-    
-    echo ✓ GitHub synced
-) else (
-    echo ℹ No local changes
-    echo Pulling latest from GitHub...
-    git pull origin main 2>nul
-    if errorlevel 1 (
-        git pull origin master 2>nul
-    )
-)
-
-del git_status.txt 2>nul
-
-echo.
-echo [STEP 2/5] Scan Local Files
-echo ════════════════════════════════════════════════════════════════
-echo.
-
-REM ============================================================================
-REM STEP 2: CREATE FILE LIST
-REM ============================================================================
-
-if exist files_to_upload.txt del files_to_upload.txt
-
-echo Detecting changed files...
-
-REM Get changed files from last commit
-git diff --name-only HEAD~1 HEAD > changed_files.txt 2>nul
-
-REM Count changed files
-set /a FILE_COUNT=0
-for /f "delims=" %%f in (changed_files.txt) do (
-    if exist "%%f" (
-        echo %%f >> files_to_upload.txt
-        set /a FILE_COUNT+=1
-        echo   → %%f
-    )
-)
-
-REM If no git changes, upload critical files
-if %FILE_COUNT%==0 (
-    echo ℹ No changes in git history
-    echo Adding critical files...
-    echo index.html >> files_to_upload.txt
-    echo support.html >> files_to_upload.txt
-    echo coming-soon.html >> files_to_upload.txt
-    echo faq.html >> files_to_upload.txt
-    echo .htaccess >> files_to_upload.txt
-    
-    REM Check which files actually exist
-    set /a FILE_COUNT=0
-    for /f "delims=" %%f in (files_to_upload.txt) do (
-        if exist "%%f" (
-            set /a FILE_COUNT+=1
-        )
-    )
-)
-
-echo.
-echo ✓ Files to upload: %FILE_COUNT%
-
-if %FILE_COUNT%==0 (
-    echo ℹ No files to upload
-    echo Everything is up to date!
-    goto :cleanup
-)
-
-echo.
-echo [STEP 3/5] Check cPanel
-echo ════════════════════════════════════════════════════════════════
-echo.
-
-REM ============================================================================
-REM STEP 3: VERIFY CPANEL CONNECTION
-REM ============================================================================
-
-echo Testing connection to %SSH_HOST%:%SSH_PORT%...
-ssh -p %SSH_PORT% -o ConnectTimeout=10 "%SSH_HOST%" "echo Connected" 2>nul
-
-if errorlevel 1 (
-    echo [ERROR] Cannot connect to cPanel
-    echo.
-    echo Please check:
-    echo   - SSH host: %SSH_HOST%
-    echo   - SSH port: %SSH_PORT%
-    echo   - Network connection
-    echo   - Firewall settings
-    echo.
-    pause
-    exit /b 1
-)
-
-echo ✓ Connected to cPanel
-
-echo.
-echo [STEP 4/5] Compare Files
-echo ════════════════════════════════════════════════════════════════
-echo.
-
-REM ============================================================================
-REM STEP 4: CHECK REMOTE FILES
-REM ============================================================================
-
-echo Checking remote files...
-
-set /a NEEDS_UPLOAD=0
-
-for /f "delims=" %%f in (files_to_upload.txt) do (
-    if exist "%%f" (
-        set "file=%%f"
-        set "remotefile=!file:\=/!"
-        
-        REM Check if file exists remotely
-        ssh -p %SSH_PORT% "%SSH_HOST%" "test -f %REMOTE_PATH%/!remotefile! && echo EXISTS || echo MISSING" > check_result.txt 2>nul
-        
-        set /p RESULT=<check_result.txt
-        
-        if "!RESULT!"=="MISSING" (
-            echo   → %%f [NEW]
-        ) else (
-            echo   → %%f [UPDATE]
-        )
-        set /a NEEDS_UPLOAD+=1
-    )
-)
-
-del check_result.txt 2>nul
-
-echo.
-echo ✓ Files needing upload: %NEEDS_UPLOAD%
-
-echo.
-echo [STEP 5/5] Upload to cPanel
-echo ════════════════════════════════════════════════════════════════
-echo.
-
-REM ============================================================================
-REM STEP 5: UPLOAD FILES
-REM ============================================================================
-
+REM Counters
 set /a UPLOADED=0
+set /a DELETED=0
 set /a FAILED=0
+set /a NEW_COUNT=0
+set /a MOD_COUNT=0
+set /a DEL_COUNT=0
 
-for /f "delims=" %%f in (files_to_upload.txt) do (
-    if exist "%%f" (
-        set "file=%%f"
-        set "remotefile=!file:\=/!"
+cls
+echo.
+echo =================================================================
+echo            HARMAALWALE DEPLOYMENT v5.0
+echo =================================================================
+echo  Repo:    harmaalwale/harmaalwale
+echo  Branch:  %GITHUB_BRANCH%
+echo  Server:  %SSH_HOST%:%SSH_PORT%
+echo  Path:    %REMOTE_PATH%
+echo =================================================================
+echo.
+
+REM ============================================================
+REM [1/7] VERIFY ENVIRONMENT
+REM ============================================================
+echo [1/7] Verifying environment...
+
+where git >nul 2>&1
+if errorlevel 1 (
+    echo   [ERROR] Git not installed
+    echo   Install from: https://git-scm.com/download/win
+    goto :END
+)
+
+where ssh >nul 2>&1
+if errorlevel 1 (
+    echo   [ERROR] SSH not found
+    echo   Enable OpenSSH Client in Windows Optional Features
+    goto :END
+)
+
+where scp >nul 2>&1
+if errorlevel 1 (
+    echo   [ERROR] SCP not found
+    goto :END
+)
+
+if not exist ".git" (
+    echo   [ERROR] Not a Git repository
+    echo   Run: git init
+    goto :END
+)
+
+echo   [OK] All tools present
+echo.
+
+REM ============================================================
+REM [2/7] CONFIGURE GITHUB REMOTE
+REM ============================================================
+echo [2/7] Configuring GitHub remote...
+
+git remote get-url origin >nul 2>&1
+if errorlevel 1 (
+    git remote add origin "%GITHUB_REPO%"
+) else (
+    git remote set-url origin "%GITHUB_REPO%"
+)
+echo   [OK] Remote: %GITHUB_REPO%
+echo.
+
+REM ============================================================
+REM [3/7] SCAN LOCAL CHANGES
+REM ============================================================
+echo [3/7] Scanning local changes...
+echo.
+
+git status --porcelain > "%TEMP%\hw_status.txt"
+
+set "HAS_CHANGES=0"
+for /f "usebackq tokens=*" %%a in ("%TEMP%\hw_status.txt") do (
+    set "HAS_CHANGES=1"
+    set "LINE=%%a"
+    set "CODE=!LINE:~0,2!"
+    set "FILEPATH=!LINE:~3!"
+    
+    if "!CODE!"=="??" (
+        echo   [NEW] !FILEPATH!
+        set /a NEW_COUNT+=1
+    ) else if "!CODE:~0,1!"=="A" (
+        echo   [ADD] !FILEPATH!
+        set /a NEW_COUNT+=1
+    ) else if "!CODE:~0,1!"=="D" (
+        echo   [DEL] !FILEPATH!
+        set /a DEL_COUNT+=1
+    ) else if "!CODE:~1,1!"=="D" (
+        echo   [DEL] !FILEPATH!
+        set /a DEL_COUNT+=1
+    ) else (
+        echo   [MOD] !FILEPATH!
+        set /a MOD_COUNT+=1
+    )
+)
+
+if "!HAS_CHANGES!"=="1" (
+    echo.
+    echo   Total: !NEW_COUNT! new, !MOD_COUNT! modified, !DEL_COUNT! deleted
+) else (
+    echo   No local changes detected
+)
+echo.
+
+REM ============================================================
+REM [4/7] COMMIT CHANGES
+REM ============================================================
+echo [4/7] Committing changes...
+
+if "!HAS_CHANGES!"=="0" (
+    echo   [SKIP] Nothing to commit
+    echo.
+    goto :PUSH
+)
+
+set "COMMIT_MSG="
+set /p "COMMIT_MSG=Commit message (Enter for auto): "
+if "!COMMIT_MSG!"=="" set "COMMIT_MSG=Deploy: %date% %time:~0,5%"
+
+git add -A
+git commit -m "!COMMIT_MSG!" >nul 2>&1
+if errorlevel 1 (
+    echo   [INFO] Nothing new to commit
+) else (
+    echo   [OK] Committed: !COMMIT_MSG!
+)
+echo.
+
+:PUSH
+REM ============================================================
+REM [5/7] PUSH TO GITHUB
+REM ============================================================
+echo [5/7] Syncing with GitHub...
+
+echo   Pulling latest...
+git pull origin %GITHUB_BRANCH% --no-rebase --no-edit >nul 2>&1
+
+echo   Pushing to %GITHUB_BRANCH%...
+git push origin %GITHUB_BRANCH% 2>nul
+if errorlevel 1 (
+    git push -u origin %GITHUB_BRANCH%
+    if errorlevel 1 (
+        echo   [WARN] GitHub push failed
+        echo.
+        set "CONTINUE="
+        set /p "CONTINUE=Continue with cPanel sync anyway? [Y/N]: "
+        if /i not "!CONTINUE!"=="Y" goto :END
+    ) else (
+        echo   [OK] Pushed to GitHub
+    )
+) else (
+    echo   [OK] Pushed to GitHub
+)
+echo.
+
+REM ============================================================
+REM [6/7] TEST CPANEL CONNECTION
+REM ============================================================
+echo [6/7] Testing cPanel connection...
+
+ssh -p %SSH_PORT% -o ConnectTimeout=15 -o BatchMode=no "%SSH_HOST%" "echo HW_CONNECTED" > "%TEMP%\hw_test.txt" 2>&1
+findstr /C:"HW_CONNECTED" "%TEMP%\hw_test.txt" >nul
+if errorlevel 1 (
+    echo   [ERROR] Cannot connect to cPanel
+    type "%TEMP%\hw_test.txt"
+    del "%TEMP%\hw_test.txt" 2>nul
+    goto :END
+)
+del "%TEMP%\hw_test.txt" 2>nul
+echo   [OK] Connected to %SSH_HOST%
+echo.
+
+REM ============================================================
+REM [7/7] SYNC FILES TO CPANEL
+REM ============================================================
+echo [7/7] Syncing files to cPanel...
+echo.
+
+REM Get current commit hash
+for /f "delims=" %%h in ('git rev-parse HEAD') do set "CURRENT_COMMIT=%%h"
+
+REM Get last deployed commit
+set "LAST_COMMIT="
+if exist "%DEPLOY_MARKER%" set /p LAST_COMMIT=<"%DEPLOY_MARKER%"
+
+REM Build upload and delete lists
+set "UPLOAD_LIST=%TEMP%\hw_upload.txt"
+set "DELETE_LIST=%TEMP%\hw_delete.txt"
+
+if "!LAST_COMMIT!"=="" (
+    echo   First deployment - uploading all tracked files
+    git ls-files > "%UPLOAD_LIST%"
+    type nul > "%DELETE_LIST%"
+) else (
+    echo   Comparing against last deploy: !LAST_COMMIT:~0,8!
+    git diff --name-only --diff-filter=ACMR !LAST_COMMIT! HEAD > "%UPLOAD_LIST%"
+    git diff --name-only --diff-filter=D !LAST_COMMIT! HEAD > "%DELETE_LIST%"
+)
+
+REM Count files
+set /a UP_COUNT=0
+set /a DEL_COUNT2=0
+for /f %%i in ('type "%UPLOAD_LIST%" ^| find /c /v ""') do set /a UP_COUNT=%%i
+for /f %%i in ('type "%DELETE_LIST%" ^| find /c /v ""') do set /a DEL_COUNT2=%%i
+
+if !UP_COUNT! EQU 0 if !DEL_COUNT2! EQU 0 (
+    echo   Server is already up to date
+    echo.
+    goto :SUMMARY
+)
+
+echo   To upload: !UP_COUNT! file(s)
+echo   To delete: !DEL_COUNT2! file(s)
+echo.
+
+REM ----- BATCH CREATE REMOTE DIRECTORIES -----
+if !UP_COUNT! GTR 0 (
+    echo   Creating remote directories...
+    
+    > "%TEMP%\hw_dirs.txt" (
+        for /f "usebackq tokens=*" %%f in ("%UPLOAD_LIST%") do (
+            set "FP=%%f"
+            set "FP=!FP:/=\!"
+            for %%a in ("!FP!") do (
+                set "DIR=%%~dpa"
+                set "DIR=!DIR:%CD%\=!"
+                set "DIR=!DIR:%CD%=!"
+                set "DIR=!DIR:\=/!"
+                if not "!DIR!"=="" if not "!DIR!"=="/" echo !DIR!
+            )
+        )
+    )
+    
+    REM Dedupe
+    if exist "%TEMP%\hw_dirs.txt" (
+        sort "%TEMP%\hw_dirs.txt" /unique /o "%TEMP%\hw_dirs_u.txt" 2>nul
+        if not exist "%TEMP%\hw_dirs_u.txt" copy "%TEMP%\hw_dirs.txt" "%TEMP%\hw_dirs_u.txt" >nul
         
-        echo Uploading: %%f
-        
-        REM Create directory structure on remote
-        for %%d in ("%%~dpf") do (
-            set "dir=%%~d"
-            set "dir=!dir:\=/!"
-            ssh -p %SSH_PORT% "%SSH_HOST%" "mkdir -p %REMOTE_PATH%/!dir!" 2>nul
+        REM Build single mkdir command
+        set "MK_CMD=cd %REMOTE_PATH%"
+        for /f "usebackq tokens=*" %%d in ("%TEMP%\hw_dirs_u.txt") do (
+            set "MK_CMD=!MK_CMD! && mkdir -p '.%%d'"
         )
         
-        REM Upload file
-        scp -P %SSH_PORT% -q "%%f" "%SSH_HOST%:%REMOTE_PATH%/!remotefile!" 2>nul
+        if not "!MK_CMD!"=="cd %REMOTE_PATH%" (
+            ssh -p %SSH_PORT% "%SSH_HOST%" "!MK_CMD!" >nul 2>&1
+        )
+    )
+    
+    echo   [OK] Directories ready
+    echo.
+)
+
+REM ----- UPLOAD FILES -----
+if !UP_COUNT! GTR 0 (
+    echo   --- UPLOADING ---
+    for /f "usebackq tokens=*" %%f in ("%UPLOAD_LIST%") do (
+        if exist "%%f" (
+            set "F=%%f"
+            set "RF=!F:\=/!"
+            
+            scp -P %SSH_PORT% -q "%%f" "%SSH_HOST%:%REMOTE_PATH%/!RF!" >nul 2>&1
+            if errorlevel 1 (
+                echo   [FAIL] %%f
+                set /a FAILED+=1
+            ) else (
+                echo   [OK]   %%f
+                set /a UPLOADED+=1
+            )
+        ) else (
+            echo   [SKIP] %%f (not found locally)
+        )
+    )
+    echo.
+)
+
+REM ----- DELETE FILES -----
+if !DEL_COUNT2! GTR 0 (
+    echo   --- DELETING ---
+    for /f "usebackq tokens=*" %%f in ("%DELETE_LIST%") do (
+        set "F=%%f"
+        set "RF=!F:\=/!"
         
+        ssh -p %SSH_PORT% "%SSH_HOST%" "rm -f '%REMOTE_PATH%/!RF!'" >nul 2>&1
         if errorlevel 1 (
-            echo   ✗ Failed
+            echo   [FAIL] %%f
             set /a FAILED+=1
         ) else (
-            echo   ✓ Success
-            set /a UPLOADED+=1
+            echo   [OK]   %%f (removed)
+            set /a DELETED+=1
         )
     )
+    echo.
 )
 
-echo.
-echo Setting permissions...
-ssh -p %SSH_PORT% "%SSH_HOST%" "cd %REMOTE_PATH% && chmod -R 755 . && find . -type f \( -name '*.html' -o -name '*.php' \) -exec chmod 644 {} \; && chmod 644 .htaccess 2>/dev/null" 2>nul
-echo ✓ Permissions set
+REM ----- SET PERMISSIONS -----
+echo   Setting file permissions...
+ssh -p %SSH_PORT% "%SSH_HOST%" "cd %REMOTE_PATH% && find . -type d -exec chmod 755 {} + 2>/dev/null; find . -type f -exec chmod 644 {} + 2>/dev/null" >nul 2>&1
+echo   [OK] Permissions: 755 dirs, 644 files
 
-:summary
-echo.
-echo ╔════════════════════════════════════════════════════════════════╗
-echo ║                    DEPLOYMENT SUMMARY                          ║
-echo ╠════════════════════════════════════════════════════════════════╣
-echo ║  GitHub Repo:        harmaalwale/harmaalwale.git              ║
-echo ║  Git Status:         Synced ✓                                 ║
-echo ║  Files Uploaded:     %UPLOADED%                                           ║
-if %FAILED% GTR 0 echo ║  Failed Uploads:     %FAILED%                                           ║
-echo ║  cPanel Status:      Synced ✓                                 ║
-echo ╠════════════════════════════════════════════════════════════════╣
-echo ║  Website:            https://harmaalwale.com                  ║
-echo ║  GitHub:             https://github.com/harmaalwale/harmaalwale║
-echo ║  Time:               %date% %time:~0,8%                        ║
-echo ╚════════════════════════════════════════════════════════════════╝
-echo.
+REM ----- SAVE DEPLOY MARKER -----
+echo !CURRENT_COMMIT!>"%DEPLOY_MARKER%"
 
-:cleanup
-REM Cleanup temp files
-del changed_files.txt 2>nul
-del files_to_upload.txt 2>nul
-
-if %FAILED% GTR 0 (
-    echo [WARNING] Some uploads failed
-    echo Run deploy.bat again to retry
-) else if %UPLOADED% GTR 0 (
-    echo ✓ Deployment Complete!
+REM Ensure marker is gitignored
+if exist ".gitignore" (
+    findstr /C:"%DEPLOY_MARKER%" .gitignore >nul 2>&1
+    if errorlevel 1 echo %DEPLOY_MARKER%>>.gitignore
 ) else (
-    echo ℹ Everything up to date!
+    echo %DEPLOY_MARKER%>.gitignore
 )
 
+:SUMMARY
 echo.
-echo Repository: https://github.com/harmaalwale/harmaalwale
-echo Website: https://harmaalwale.com
+echo =================================================================
+echo                       DEPLOYMENT SUMMARY
+echo =================================================================
+echo  GitHub:     synced (branch: %GITHUB_BRANCH%)
+echo  Uploaded:   !UPLOADED! file(s)
+echo  Deleted:    !DELETED! file(s)
+if !FAILED! GTR 0 (
+    echo  Failed:     !FAILED! operation(s)
+)
 echo.
-pause
+echo  Website:    https://harmaalwale.com
+echo  GitHub:     https://github.com/harmaalwale/harmaalwale
+echo  Time:       %date% %time:~0,8%
+echo =================================================================
+
+if !FAILED! GTR 0 (
+    echo.
+    echo  [WARNING] Some operations failed. Re-run to retry.
+) else if !UPLOADED! GTR 0 (
+    echo.
+    echo  [SUCCESS] Deployment complete!
+) else if !DELETED! GTR 0 (
+    echo.
+    echo  [SUCCESS] Cleanup complete!
+) else (
+    echo.
+    echo  [INFO] Everything was already up to date
+)
+
+REM Cleanup temp files
+del "%TEMP%\hw_status.txt" 2>nul
+del "%TEMP%\hw_upload.txt" 2>nul
+del "%TEMP%\hw_delete.txt" 2>nul
+del "%TEMP%\hw_dirs.txt" 2>nul
+del "%TEMP%\hw_dirs_u.txt" 2>nul
+
+:END
+echo.
+echo Press any key to close...
+pause >nul
+endlocal
+exit /b 0

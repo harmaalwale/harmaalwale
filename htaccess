@@ -1,60 +1,53 @@
-# HarmaalWale - URL Rewriting Rules
-# This file hides .html extensions from URLs
-
-# Enable Rewrite Engine
+# HarmaalWale - Clean URL Rewriting
 RewriteEngine On
 RewriteBase /
 
-# Remove www (optional - forces non-www)
-# RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
-# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
-
-# Force HTTPS (optional - uncomment to force SSL)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# Remove trailing slash (optional)
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} (.+)/$
-RewriteRule ^ %1 [R=301,L]
-
-# Redirect .html URLs to clean URLs
-# Example: /support.html → /support
+# Redirect .html files to clean URLs
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.html [NC]
 RewriteRule ^ %1 [R=301,L]
 
-# Serve .html files for clean URLs
-# Example: /support → serves support.html
+# Serve .html files for clean URLs (without .html in address bar)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.html -f
-RewriteRule ^(.+)$ $1.html [L]
+RewriteRule ^(.+)$ $1.html [L,QSA]
 
-# Custom Error Pages (optional)
-ErrorDocument 404 /404.html
-ErrorDocument 500 /500.html
+# For directory requests, try index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}/index.html -f
+RewriteRule ^(.+)$ $1/index.html [L,QSA]
 
-# Security Headers (optional but recommended)
-<IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-XSS-Protection "1; mode=block"
+# Prevent access to hidden files
+<FilesMatch "^\.|^#.*#|~$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Set correct MIME types
+AddType text/html .html
+AddType application/json .json
+AddType text/css .css
+AddType application/javascript .js
+AddEncoding gzip .js.gz
+AddEncoding gzip .css.gz
+
+# Enable gzip compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json
 </IfModule>
 
-# Cache Control (optional)
+# Cache control
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
-
-# Prevent Directory Browsing
-Options -Indexes
-
-# Protect .htaccess file
-<Files .htaccess>
-    Order allow,deny
-    Deny from all
-</Files>
